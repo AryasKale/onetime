@@ -37,6 +37,8 @@ export default function Home() {
   const [copied, setCopied] = useState(false)
   const [emails, setEmails] = useState<EmailData[]>([])
   const [inboxId, setInboxId] = useState<string | null>(null)
+  const [loadingEmails, setLoadingEmails] = useState(false)
+  const [emailsError, setEmailsError] = useState<string | null>(null)
 
   // Countdown timer effect
   useEffect(() => {
@@ -66,9 +68,12 @@ export default function Home() {
     }
   }, [inbox])
 
-  // Set up realtime subscription for emails
+  // Set up realtime subscription for emails and load existing emails
   useEffect(() => {
     if (inboxId) {
+      setLoadingEmails(true)
+      setEmailsError(null)
+
       // Subscribe to realtime updates on emails table
       const subscription = supabase
         .channel('emails-changes')
@@ -107,11 +112,16 @@ export default function Home() {
 
           if (error) {
             console.error('Error loading emails:', error)
+            setEmailsError('Failed to load emails')
           } else {
             setEmails(data || [])
+            console.log(`Loaded ${data?.length || 0} existing emails`)
           }
         } catch (err) {
           console.error('Error loading emails:', err)
+          setEmailsError('Failed to load emails')
+        } finally {
+          setLoadingEmails(false)
         }
       }
 
@@ -136,6 +146,18 @@ export default function Home() {
     const minutes = Math.floor(seconds / 60)
     const remainingSeconds = seconds % 60
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+  }
+
+  // Format email timestamp
+  const formatEmailTime = (timestamp: string) => {
+    const date = new Date(timestamp)
+    const now = new Date()
+    const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+    
+    if (diffInMinutes < 1) return 'Just now'
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`
+    if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`
+    return date.toLocaleDateString()
   }
 
   // Generate new inbox
@@ -211,12 +233,36 @@ export default function Home() {
     setCopied(false)
     setEmails([])
     setInboxId(null)
+    setLoadingEmails(false)
+    setEmailsError(null)
+  }
+
+  // Mark email as read
+  const markEmailAsRead = async (emailId: string) => {
+    try {
+      const { error } = await supabase
+        .from('emails')
+        .update({ is_read: true })
+        .eq('id', emailId)
+
+      if (!error) {
+        setEmails(prev => 
+          prev.map(email => 
+            email.id === emailId 
+              ? { ...email, is_read: true }
+              : email
+          )
+        )
+      }
+    } catch (err) {
+      console.error('Error marking email as read:', err)
+    }
   }
 
   if (inbox) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
-        <div className="max-w-md w-full">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-start justify-center p-4 pt-8">
+        <div className="max-w-4xl w-full">
           <div className="text-center mb-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-2">
               Your Temporary Inbox
@@ -226,7 +272,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100">
+          <div className="bg-white rounded-xl shadow-lg p-8 border border-gray-100 mb-6">
             {/* Email Address Display */}
             <div className="text-center mb-6">
               <div className="bg-gray-50 rounded-lg p-4 mb-4 border-2 border-dashed border-gray-200">
@@ -294,75 +340,145 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Received Emails List */}
-          {emails.length > 0 && (
-            <div className="mt-6 bg-white rounded-xl shadow-lg border border-gray-100">
-              <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Received Emails ({emails.length})
-                </h3>
+          {/* Email List Section */}
+          <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  📬 Inbox ({emails.length})
+                </h2>
+                {loadingEmails && (
+                  <div className="flex items-center text-blue-600 text-sm">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Loading emails...
+                  </div>
+                )}
               </div>
-              <div className="max-h-96 overflow-y-auto">
+            </div>
+
+            {/* Loading State */}
+            {loadingEmails && emails.length === 0 && (
+              <div className="p-8 text-center">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/2 mx-auto mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {emailsError && (
+              <div className="p-6 text-center">
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-600 text-sm">{emailsError}</p>
+                </div>
+              </div>
+            )}
+
+            {/* Email List */}
+            {!loadingEmails && emails.length > 0 && (
+              <div className="divide-y divide-gray-100 max-h-96 overflow-y-auto">
                 {emails.map((email) => (
-                  <div key={email.id} className="p-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
-                    <div className="flex items-start justify-between mb-2">
+                  <div 
+                    key={email.id} 
+                    className="p-6 hover:bg-gray-50 transition-colors cursor-pointer group"
+                    onClick={() => markEmailAsRead(email.id)}
+                  >
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-gray-900 truncate">
-                            From: {email.sender}
-                          </span>
-                          {!email.is_read && (
-                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              New
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="flex items-center min-w-0 flex-1">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold text-sm mr-3 flex-shrink-0">
+                              {email.sender.charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-gray-900 truncate">
+                                {email.sender}
+                              </p>
+                              <p className="text-xs text-gray-500 truncate">
+                                To: {email.recipient}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <span className="text-xs text-gray-500">
+                              {formatEmailTime(email.received_at)}
                             </span>
-                          )}
+                            {!email.is_read && (
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                New
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-sm text-gray-600 truncate mb-1">
-                          Subject: {email.subject || '(No Subject)'}
+                        
+                        <div className="mb-3">
+                          <h3 className="text-lg font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                            {email.subject || '(No Subject)'}
+                          </h3>
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {new Date(email.received_at).toLocaleString()}
+
+                        {email.body && (
+                          <div className="mb-3">
+                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-3">
+                              {email.body.length > 300 
+                                ? `${email.body.substring(0, 300)}...` 
+                                : email.body
+                              }
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <div className="flex items-center gap-4">
+                            <span>Size: {Math.round(email.size_bytes / 1024)}KB</span>
+                            {email.attachments && email.attachments.length > 0 && (
+                              <div className="flex items-center">
+                                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                                </svg>
+                                {email.attachments.length} attachment(s)
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            {new Date(email.received_at).toLocaleString()}
+                          </div>
                         </div>
                       </div>
                     </div>
-                    {email.body && (
-                      <div className="mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2 max-h-20 overflow-hidden">
-                        {email.body.substring(0, 200)}
-                        {email.body.length > 200 && '...'}
-                      </div>
-                    )}
-                    {email.attachments && email.attachments.length > 0 && (
-                      <div className="mt-2 flex items-center text-xs text-gray-500">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                        </svg>
-                        {email.attachments.length} attachment(s)
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Empty State for Emails */}
-          {emails.length === 0 && (
-            <div className="mt-6 bg-white rounded-xl shadow-lg border border-gray-100 p-8">
-              <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-4 text-gray-400">
+            {/* Empty State */}
+            {!loadingEmails && emails.length === 0 && !emailsError && (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 mx-auto mb-4 text-gray-400">
                   <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No emails yet</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-xl font-medium text-gray-900 mb-2">No emails yet</h3>
+                <p className="text-gray-600 text-sm mb-4">
                   Your temporary inbox is active and ready to receive emails.
                   <br />
                   New emails will appear here automatically!
                 </p>
+                <button
+                  onClick={sendTestEmail}
+                  className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200"
+                >
+                  📧 Send Test Email
+                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Quick Stats */}
           <div className="mt-6 grid grid-cols-3 gap-4 text-center text-sm text-gray-500">
