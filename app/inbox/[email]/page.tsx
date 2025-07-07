@@ -44,6 +44,7 @@ export default function InboxPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [isOnline, setIsOnline] = useState(true)
   const [newEmailAlert, setNewEmailAlert] = useState<string | null>(null)
+  const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
 
   // Load inbox data on mount
   useEffect(() => {
@@ -367,6 +368,20 @@ export default function InboxPage() {
     router.push('/')
   }
 
+  // Toggle email expansion
+  const toggleEmailExpansion = (emailId: string, event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent marking as read when clicking expand
+    setExpandedEmails(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(emailId)) {
+        newSet.delete(emailId)
+      } else {
+        newSet.add(emailId)
+      }
+      return newSet
+    })
+  }
+
   // Generate sender avatar
   const getSenderAvatar = (sender: string) => {
     const initials = sender.split('@')[0].substring(0, 2).toUpperCase()
@@ -520,12 +535,19 @@ export default function InboxPage() {
             <div className="space-y-4">
               {emails.map((email) => {
                 const avatar = getSenderAvatar(email.sender)
+                const isExpanded = expandedEmails.has(email.id)
+                const emailBody = email.body || '' // Handle null/undefined body
+                const isLongEmail = emailBody.length > 200
+                const displayBody = isExpanded ? emailBody : emailBody.substring(0, 200)
+                const hasHtmlContent = email.html_body && email.html_body.trim() !== ''
+                const hasMeaningfulContent = emailBody.length > 0 || hasHtmlContent
+                
                 return (
                   <div 
                     key={email.id} 
                     className={`bg-white/80 backdrop-blur-sm rounded-2xl p-6 border transition-all cursor-pointer hover:bg-gray-50 hover:scale-[1.02] ${
                       email.is_read ? 'border-gray-300' : 'border-blue-400 bg-blue-50 shadow-lg'
-                    }`}
+                    } ${isExpanded ? 'ring-2 ring-blue-200 bg-blue-25' : ''}`}
                     onClick={() => markEmailAsRead(email.id)}
                   >
                     <div className="flex items-start gap-4">
@@ -545,10 +567,53 @@ export default function InboxPage() {
                         <div className="text-gray-800 font-medium mb-3 text-lg">
                           {email.subject || '(No Subject)'}
                         </div>
-                        <div className="text-gray-600 text-sm leading-relaxed">
-                          {email.body.substring(0, 200)}
-                          {email.body.length > 200 && '...'}
-                        </div>
+                        
+                        {/* Email Content */}
+                        {hasMeaningfulContent ? (
+                          <div className={`text-gray-600 text-sm leading-relaxed ${isExpanded && hasHtmlContent ? 'bg-gray-50 p-4 rounded-lg border-l-4 border-blue-400' : ''}`}>
+                            {isExpanded ? (
+                              // When expanded, show HTML if available, otherwise simple full text
+                              hasHtmlContent ? (
+                                <div 
+                                  className="prose prose-sm max-w-none"
+                                  dangerouslySetInnerHTML={{ __html: email.html_body }}
+                                />
+                              ) : (
+                                <div className="whitespace-pre-wrap">
+                                  {emailBody}
+                                </div>
+                              )
+                            ) : (
+                              // When collapsed, show truncated plain text
+                              <div>
+                                {displayBody}
+                                {isLongEmail && '...'}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-gray-400 text-sm italic">
+                            No content available
+                          </div>
+                        )}
+                        
+                        {/* Expand/Collapse Button - Only show if there's meaningful content */}
+                        {hasMeaningfulContent && (isLongEmail || hasHtmlContent) && (
+                          <div className="mt-3 flex items-center justify-between">
+                            <button
+                              onClick={(e) => toggleEmailExpansion(email.id, e)}
+                              className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors hover:underline"
+                            >
+                              {isExpanded ? 'Show less' : hasHtmlContent ? 'View HTML' : 'Read more'}
+                            </button>
+                            {isExpanded && !hasHtmlContent && (
+                              <span className="text-xs text-gray-400">
+                                {emailBody.length} characters
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        
                         {email.attachments && email.attachments.length > 0 && (
                           <div className="mt-3 flex items-center gap-2 text-amber-600 text-sm">
                             📎 {email.attachments.length} attachment(s)
