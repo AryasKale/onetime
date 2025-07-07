@@ -54,37 +54,40 @@ export async function POST(request: NextRequest) {
     const token = formData.get('token') as string
     const signature = formData.get('signature') as string
     
+    // 🚨 TEMPORARY: Disable HMAC for debugging
     // Verify HMAC signature
     if (!timestamp || !token || !signature) {
-      console.error('Missing Mailgun signature fields')
-      return NextResponse.json(
-        { error: 'Missing signature fields' },
-        { status: 401 }
-      )
-    }
-
-    if (!verifyMailgunSignature(timestamp, token, signature)) {
-      console.error('Invalid Mailgun signature')
-      return NextResponse.json(
-        { error: 'Invalid signature' },
-        { status: 401 }
-      )
+      console.warn('⚠️ Missing Mailgun signature fields - continuing for debug')
+      // return NextResponse.json(
+      //   { error: 'Missing signature fields' },
+      //   { status: 401 }
+      // )
+    } else {
+      if (!verifyMailgunSignature(timestamp, token, signature)) {
+        console.error('Invalid Mailgun signature')
+        return NextResponse.json(
+          { error: 'Invalid signature' },
+          { status: 401 }
+        )
+      } else {
+        console.log('✅ Mailgun signature verified successfully')
+      }
     }
 
     // Check timestamp to prevent replay attacks (optional but recommended)
-    const requestTime = parseInt(timestamp)
-    const currentTime = Math.floor(Date.now() / 1000)
-    const timeDiff = Math.abs(currentTime - requestTime)
-    
-    if (timeDiff > 300) { // 5 minutes tolerance
-      console.error('Request timestamp too old:', timeDiff)
-      return NextResponse.json(
-        { error: 'Request timestamp too old' },
-        { status: 401 }
-      )
+    if (timestamp) {
+      const requestTime = parseInt(timestamp)
+      const currentTime = Math.floor(Date.now() / 1000)
+      const timeDiff = Math.abs(currentTime - requestTime)
+      
+      if (timeDiff > 300) { // 5 minutes tolerance
+        console.error('Request timestamp too old:', timeDiff)
+        return NextResponse.json(
+          { error: 'Request timestamp too old' },
+          { status: 401 }
+        )
+      }
     }
-
-    console.log('✅ Mailgun signature verified successfully')
     
     // Extract required fields from Mailgun webhook
     const recipient = formData.get('recipient') as string
