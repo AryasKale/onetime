@@ -1,10 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
+import { createHmac } from 'crypto'
+
+// Function to verify Mailgun HMAC signature
+function verifyMailgunSignature(timestamp: string, token: string, signature: string): boolean {
+  const signingKey = process.env.MAILGUN_WEBHOOK_SIGNING_KEY
+  
+  if (!signingKey) {
+    console.error('MAILGUN_WEBHOOK_SIGNING_KEY not configured')
+    return false
+  }
+
+  // Create the signature string that Mailgun uses
+  const signatureString = timestamp + token
+  
+  // Generate HMAC with SHA256
+  const hmac = createHmac('sha256', signingKey)
+  hmac.update(signatureString)
+  const computedSignature = hmac.digest('hex')
+  
+  // Compare signatures securely
+  return computedSignature === signature
+}
 
 export async function POST(request: NextRequest) {
   try {
     // Parse form data from Mailgun webhook
     const formData = await request.formData()
+    
+    // Extract Mailgun signature fields for verification
+    const timestamp = formData.get('timestamp') as string
+    const token = formData.get('token') as string
+    const signature = formData.get('signature') as string
+    
+    // Verify HMAC signature
+    if (!timestamp || !token || !signature) {
+      console.error('Missing Mailgun signature fields')
+      return NextResponse.json(
+        { error: 'Missing signature fields' },
+        { status: 401 }
+      )
+    }
+
+    if (!verifyMailgunSignature(timestamp, token, signature)) {
+      console.error('Invalid Mailgun signature')
+      return NextResponse.json(
+        { error: 'Invalid signature' },
+        { status: 401 }
+      )
+    }
+
+    // Check timestamp to prevent replay attacks (optional but recommended)
+    const requestTime = parseInt(timestamp)
+    const currentTime = Math.floor(Date.now() / 1000)
+    const timeDiff = Math.abs(currentTime - requestTime)
+    
+    if (timeDiff > 300) { // 5 minutes tolerance
+      console.error('Request timestamp too old:', timeDiff)
+      return NextResponse.json(
+        { error: 'Request timestamp too old' },
+        { status: 401 }
+      )
+    }
+
+    console.log('✅ Mailgun signature verified successfully')
     
     // Extract required fields from Mailgun webhook
     const recipient = formData.get('recipient') as string
@@ -12,7 +71,6 @@ export async function POST(request: NextRequest) {
     const subject = formData.get('subject') as string || ''
     const bodyPlain = formData.get('body-plain') as string || ''
     const bodyHtml = formData.get('body-html') as string || ''
-    const timestamp = formData.get('timestamp') as string
     const attachmentCount = parseInt(formData.get('attachment-count') as string || '0')
     
     // Validate required fields
@@ -125,12 +183,17 @@ export async function POST(request: NextRequest) {
 // Handle GET requests with API info
 export async function GET() {
   return NextResponse.json({
-    message: 'Mailgun Inbound Webhook API',
+    message: 'Mailgun Inbound Webhook API with HMAC Security',
     endpoint: '/api/mailgun-inbound',
     method: 'POST',
     description: 'Accepts POST requests from Mailgun webhooks to process inbound emails',
-    required_fields: ['recipient', 'sender'],
-    optional_fields: ['subject', 'body-plain', 'body-html', 'timestamp', 'attachment-count'],
+    required_fields: ['recipient', 'sender', 'timestamp', 'token', 'signature'],
+    optional_fields: ['subject', 'body-plain', 'body-html', 'attachment-count'],
+    security: {
+      hmac_verification: 'Validates HMAC signature using SHA256',
+      timestamp_validation: 'Prevents replay attacks (5-minute tolerance)',
+      signing_key_required: 'MAILGUN_WEBHOOK_SIGNING_KEY environment variable required'
+    },
     features: {
       inbox_validation: 'Validates recipient inbox exists and is active',
       expiry_check: 'Rejects emails for expired inboxes',
