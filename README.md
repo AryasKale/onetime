@@ -25,6 +25,13 @@ One-Time Email provides users with temporary, disposable email addresses that se
 - [x] **Email viewing interface** - Beautiful list of received messages
 - [x] **Browser notifications** - Desktop alerts for new emails
 - [x] **Test email functionality** - Send sample emails to test real-time updates
+- [x] **🛡️ Multi-layer security protection** - HMAC verification and attack prevention
+- [x] **🚦 Rate limiting system** - Prevents spam and abuse (10 emails/min per sender)
+- [x] **📧 Email format validation** - Only accepts valid generated email patterns
+- [x] **🔍 Suspicious content detection** - Blocks malicious emails and XSS attempts
+- [x] **📏 Email size validation** - Prevents large payload attacks (1MB limit)
+- [x] **⏰ Timestamp validation** - Prevents replay attacks with 5-minute tolerance
+- [x] **🗄️ Database validation** - Only processes emails to existing active inboxes
 
 ### 🔄 In Progress
 - [ ] SMTP email reception integration
