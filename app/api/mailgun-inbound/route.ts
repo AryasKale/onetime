@@ -165,10 +165,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Received email for: ${recipient} from: ${sender}`)
+    console.log(`🔍 Processing email for: ${recipient} from: ${sender}`)
 
     // 🛡️ SECURITY: Find the corresponding inbox by email address
     // This ensures only emails to EXISTING inboxes are processed
+    console.log(`🗄️ Checking database for inbox: ${recipient}`)
+    
     const { data: inboxData, error: inboxError } = await supabase
       .from('inbox')
       .select('id, expires_at, is_active')
@@ -176,10 +178,37 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .single()
 
+    console.log(`📊 Database result:`, { 
+      found: !!inboxData, 
+      error: inboxError?.message, 
+      count: inboxData ? 1 : 0 
+    })
+
     if (inboxError || !inboxData) {
-      console.warn(`⚠️ Email rejected - inbox not found: ${recipient}`)
+      console.error(`🚫 BLOCKING EMAIL - Inbox not found: ${recipient}`)
+      console.error(`🚫 Database error:`, inboxError)
+      
+      // Return early - DO NOT PROCESS EMAIL
       return NextResponse.json(
-        { error: 'Inbox not found or inactive', recipient },
+        { 
+          error: 'Inbox not found or inactive', 
+          recipient,
+          debug: {
+            database_error: inboxError?.message,
+            inbox_exists: false
+          }
+        },
+        { status: 404 }
+      )
+    }
+
+    console.log(`✅ Valid inbox found: ${inboxData.id} for ${recipient}`)
+
+    // 🛡️ FAILSAFE: Double-check inbox exists and is valid
+    if (!inboxData || !inboxData.id) {
+      console.error(`🚫 FAILSAFE BLOCK - Invalid inbox data for: ${recipient}`)
+      return NextResponse.json(
+        { error: 'Invalid inbox data', recipient },
         { status: 404 }
       )
     }
@@ -189,12 +218,14 @@ export async function POST(request: NextRequest) {
     const expiresAt = new Date(inboxData.expires_at)
     
     if (now > expiresAt) {
-      console.log(`Email rejected - inbox expired: ${recipient}`)
+      console.error(`🚫 BLOCKING EMAIL - Inbox expired: ${recipient}`)
       return NextResponse.json(
         { error: 'Inbox has expired', recipient, expires_at: inboxData.expires_at },
         { status: 410 }
       )
     }
+
+    console.log(`🎯 All validations passed - processing email for ${recipient}`)
 
     // Calculate email size (rough estimate)
     const sizeBytes = (bodyPlain.length + bodyHtml.length + subject.length) * 2 // UTF-16 approximation
@@ -208,6 +239,17 @@ export async function POST(request: NextRequest) {
         const attachmentName = formData.get(`attachment-${i+1}`)
         return attachmentName ? { name: attachmentName, count: i+1 } : null
       }).filter(Boolean) : []
+
+    // 🛡️ FINAL VALIDATION: Ensure we have valid inbox before inserting
+    if (!inboxData.id) {
+      console.error(`🚫 FINAL BLOCK - Missing inbox ID at insert time`)
+      return NextResponse.json(
+        { error: 'Final validation failed', recipient },
+        { status: 400 }
+      )
+    }
+
+    console.log(`💾 Inserting email into database for inbox: ${inboxData.id}`)
 
     // Insert email into database
     const { data: emailData, error: emailError } = await supabase
