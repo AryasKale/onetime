@@ -2,6 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
 import { createHmac } from 'crypto'
 
+// 🛡️ SECURITY: Rate limiting storage (in production, use Redis)
+const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
+
+// Rate limiting function
+function checkRateLimit(identifier: string, maxRequests: number = 20, windowMs: number = 60000): boolean {
+  const now = Date.now()
+  const record = rateLimitMap.get(identifier)
+  
+  if (!record || now > record.resetTime) {
+    rateLimitMap.set(identifier, { count: 1, resetTime: now + windowMs })
+    return true
+  }
+  
+  if (record.count >= maxRequests) {
+    return false
+  }
+  
+  record.count++
+  return true
+}
+
 // Function to verify Mailgun HMAC signature
 function verifyMailgunSignature(timestamp: string, token: string, signature: string): boolean {
   const signingKey = process.env.MAILGUN_WEBHOOK_SIGNING_KEY
@@ -73,6 +94,24 @@ export async function POST(request: NextRequest) {
     const bodyHtml = formData.get('body-html') as string || ''
     const attachmentCount = parseInt(formData.get('attachment-count') as string || '0')
     
+    // 🛡️ SECURITY: Rate limiting by sender email (prevent spam from same sender)
+    if (!checkRateLimit(`sender:${sender}`, 10, 60000)) {
+      console.warn(`⚠️ Rate limit exceeded for sender: ${sender}`)
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', sender },
+        { status: 429 }
+      )
+    }
+    
+    // 🛡️ SECURITY: Rate limiting by recipient (prevent targeting specific inbox)
+    if (!checkRateLimit(`recipient:${recipient}`, 15, 60000)) {
+      console.warn(`⚠️ Rate limit exceeded for recipient: ${recipient}`)
+      return NextResponse.json(
+        { error: 'Rate limit exceeded', recipient },
+        { status: 429 }
+      )
+    }
+    
     // Validate required fields
     if (!recipient || !sender) {
       return NextResponse.json(
@@ -81,9 +120,52 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 🛡️ SECURITY: Validate email format matches our generated pattern
+    const emailPattern = /^[a-z0-9]{6}@onetimeemail\.net$/
+    if (!emailPattern.test(recipient)) {
+      console.warn(`⚠️ Invalid email format rejected: ${recipient}`)
+      return NextResponse.json(
+        { error: 'Invalid email format', recipient },
+        { status: 400 }
+      )
+    }
+
+    // 🛡️ SECURITY: Email size validation (prevent large payload attacks)
+    const totalSize = (bodyPlain.length + bodyHtml.length + subject.length)
+    const maxEmailSize = 1024 * 1024 // 1MB limit
+    if (totalSize > maxEmailSize) {
+      console.warn(`⚠️ Email too large rejected: ${totalSize} bytes from ${sender}`)
+      return NextResponse.json(
+        { error: 'Email too large', size: totalSize, max: maxEmailSize },
+        { status: 413 }
+      )
+    }
+
+    // 🛡️ SECURITY: Suspicious pattern detection
+    const suspiciousPatterns = [
+      /javascript:/i,
+      /<script/i,
+      /data:text\/html/i,
+      /vbscript:/i,
+      /onload=/i,
+      /onerror=/i
+    ]
+    
+    const combinedContent = `${subject} ${bodyPlain} ${bodyHtml}`.toLowerCase()
+    const hasSuspiciousContent = suspiciousPatterns.some(pattern => pattern.test(combinedContent))
+    
+    if (hasSuspiciousContent) {
+      console.warn(`⚠️ Suspicious content detected from ${sender}`)
+      return NextResponse.json(
+        { error: 'Suspicious content detected', sender },
+        { status: 400 }
+      )
+    }
+
     console.log(`Received email for: ${recipient} from: ${sender}`)
 
-    // Find the corresponding inbox by email address
+    // 🛡️ SECURITY: Find the corresponding inbox by email address
+    // This ensures only emails to EXISTING inboxes are processed
     const { data: inboxData, error: inboxError } = await supabase
       .from('inbox')
       .select('id, expires_at, is_active')
@@ -92,7 +174,7 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (inboxError || !inboxData) {
-      console.error('Inbox not found:', inboxError)
+      console.warn(`⚠️ Email rejected - inbox not found: ${recipient}`)
       return NextResponse.json(
         { error: 'Inbox not found or inactive', recipient },
         { status: 404 }
