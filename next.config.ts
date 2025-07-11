@@ -124,7 +124,7 @@ const nextConfig: NextConfig = {
       transform: '@heroicons/react/24/solid/{{member}}',
     },
   },
-
+  
   // Redirects for SEO
   async redirects() {
     return [
