@@ -252,17 +252,21 @@ export async function POST(request: NextRequest) {
       console.error(`🚫 BLOCKING EMAIL - Inbox not found: ${recipient}`)
       console.error(`🚫 Database error:`, inboxError)
       
-      // 🔄 EASIEST BOUNCING: Send bounce message via Mailgun API
+      // 🔄 BOUNCING: Send bounce message via Mailgun API
       await sendBounceMessage(sender, recipient, subject, 'Mailbox unavailable', 
         'The email address you are trying to reach is not available.')
       
+      // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
+      // This tells Mailgun "email processed successfully, don't retry"
       return NextResponse.json(
         { 
-          error: 'Inbox not found - bounce sent', 
+          success: true,
+          message: 'Email rejected - bounce notification sent', 
           recipient,
-          bounce_sent_to: sender
+          bounce_sent_to: sender,
+          action: 'bounced'
         },
-        { status: 404 }
+        { status: 200 } // Changed from 404 to 200
       )
     }
 
@@ -284,13 +288,21 @@ export async function POST(request: NextRequest) {
     if (now > expiresAt) {
       console.error(`🚫 BLOCKING EMAIL - Inbox expired: ${recipient}`)
       
-      // 🔄 EASIEST BOUNCING: Send bounce message via Mailgun API
+      // 🔄 BOUNCING: Send bounce message via Mailgun API
       await sendBounceMessage(sender, recipient, subject, 'Mailbox expired', 
         'The temporary email address has expired and is no longer accepting messages.')
       
+      // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
       return NextResponse.json(
-        { error: 'Inbox expired - bounce sent', recipient, expires_at: inboxData.expires_at, bounce_sent_to: sender },
-        { status: 410 }
+        { 
+          success: true,
+          message: 'Email rejected - expired inbox bounce sent',
+          recipient, 
+          expires_at: inboxData.expires_at, 
+          bounce_sent_to: sender,
+          action: 'bounced'
+        },
+        { status: 200 } // Changed from 410 to 200
       )
     }
 
