@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect } from 'react'
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
 
 interface VitalsMetric {
   id: string
@@ -30,17 +29,98 @@ function sendToAnalytics(metric: VitalsMetric) {
   }
 }
 
+// Native Core Web Vitals implementation
+function observeCLS(callback: (metric: VitalsMetric) => void) {
+  if (!('PerformanceObserver' in window)) return
+  
+  let clsValue = 0
+  let clsEntries: PerformanceEntry[] = []
+  
+  new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+      if ((entry as any).hadRecentInput) continue
+      clsValue += (entry as any).value
+      clsEntries.push(entry)
+    }
+    
+    callback({
+      id: 'cls',
+      name: 'CLS',
+      value: clsValue,
+      rating: clsValue < 0.1 ? 'good' : clsValue < 0.25 ? 'needs-improvement' : 'poor',
+      delta: clsValue,
+      entries: clsEntries
+    })
+  }).observe({ type: 'layout-shift', buffered: true })
+}
+
+function observeFCP(callback: (metric: VitalsMetric) => void) {
+  if (!('PerformanceObserver' in window)) return
+  
+  new PerformanceObserver((entryList) => {
+    for (const entry of entryList.getEntries()) {
+      if (entry.name === 'first-contentful-paint') {
+        callback({
+          id: 'fcp',
+          name: 'FCP',
+          value: entry.startTime,
+          rating: entry.startTime < 1800 ? 'good' : entry.startTime < 3000 ? 'needs-improvement' : 'poor',
+          delta: entry.startTime,
+          entries: [entry]
+        })
+      }
+    }
+  }).observe({ type: 'paint', buffered: true })
+}
+
+function observeLCP(callback: (metric: VitalsMetric) => void) {
+  if (!('PerformanceObserver' in window)) return
+  
+  new PerformanceObserver((entryList) => {
+    const entries = entryList.getEntries()
+    const lastEntry = entries[entries.length - 1]
+    
+    callback({
+      id: 'lcp',
+      name: 'LCP', 
+      value: lastEntry.startTime,
+      rating: lastEntry.startTime < 2500 ? 'good' : lastEntry.startTime < 4000 ? 'needs-improvement' : 'poor',
+      delta: lastEntry.startTime,
+      entries: [lastEntry]
+    })
+  }).observe({ type: 'largest-contentful-paint', buffered: true })
+}
+
+function observeTTFB(callback: (metric: VitalsMetric) => void) {
+  if (!('performance' in window) || !('timing' in performance)) return
+  
+  window.addEventListener('load', () => {
+    const { responseStart, navigationStart } = performance.timing
+    const ttfb = responseStart - navigationStart
+    
+    callback({
+      id: 'ttfb',
+      name: 'TTFB',
+      value: ttfb,
+      rating: ttfb < 800 ? 'good' : ttfb < 1800 ? 'needs-improvement' : 'poor',
+      delta: ttfb,
+      entries: []
+    })
+  })
+}
+
 export default function WebVitals() {
   useEffect(() => {
-    // Track all Core Web Vitals
-    getCLS(sendToAnalytics)
-    getFID(sendToAnalytics)
-    getFCP(sendToAnalytics)
-    getLCP(sendToAnalytics)
-    getTTFB(sendToAnalytics)
+    if (typeof window === 'undefined') return
+    
+    // Track Core Web Vitals with native implementations
+    observeCLS(sendToAnalytics)
+    observeFCP(sendToAnalytics)
+    observeLCP(sendToAnalytics)
+    observeTTFB(sendToAnalytics)
     
     // Track custom performance metrics
-    if (typeof window !== 'undefined' && 'performance' in window) {
+    if ('performance' in window) {
       // Track page load time
       window.addEventListener('load', () => {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
@@ -49,19 +129,6 @@ export default function WebVitals() {
           name: 'Page Load Time',
           value: loadTime,
           rating: loadTime < 2000 ? 'good' : loadTime < 4000 ? 'needs-improvement' : 'poor',
-          delta: 0,
-          entries: []
-        })
-      })
-      
-      // Track DOM content loaded
-      document.addEventListener('DOMContentLoaded', () => {
-        const domTime = performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart
-        sendToAnalytics({
-          id: 'dom-content-loaded',
-          name: 'DOM Content Loaded',
-          value: domTime,
-          rating: domTime < 1000 ? 'good' : domTime < 2000 ? 'needs-improvement' : 'poor',
           delta: 0,
           entries: []
         })
