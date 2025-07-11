@@ -55,6 +55,10 @@ This is an automated message from the OneTimeEmail delivery system.
 
     if (response.ok) {
       console.log(`✅ Bounce message sent to: ${originalSender}`)
+      
+      // 📊 METRICS: Track sent bounce email
+      await trackMetric('total_emails_sent', 1)
+      
       return true
     } else {
       console.error(`❌ Failed to send bounce: ${response.statusText}`)
@@ -63,6 +67,18 @@ This is an automated message from the OneTimeEmail delivery system.
   } catch (error) {
     console.error('❌ Error sending bounce message:', error)
     return false
+  }
+}
+
+// 📊 METRICS TRACKING FUNCTION
+async function trackMetric(metricName: string, incrementBy: number = 1) {
+  try {
+    await supabase.rpc('increment_metric', {
+      metric_name_param: metricName,
+      increment_by: incrementBy
+    })
+  } catch (error) {
+    console.error(`Failed to track metric ${metricName}:`, error)
   }
 }
 
@@ -164,6 +180,10 @@ export async function POST(request: NextRequest) {
     // 🛡️ SECURITY: Rate limiting by sender email (prevent spam from same sender)
     if (!checkRateLimit(`sender:${sender}`, 10, 60000)) {
       console.warn(`⚠️ Rate limit exceeded for sender: ${sender}`)
+      
+      // 📊 METRICS: Track rate limited email
+      await trackMetric('total_rate_limited_emails', 1)
+      
       return NextResponse.json(
         { error: 'Rate limit exceeded', sender },
         { status: 429 }
@@ -173,6 +193,10 @@ export async function POST(request: NextRequest) {
     // 🛡️ SECURITY: Rate limiting by recipient (prevent targeting specific inbox)
     if (!checkRateLimit(`recipient:${recipient}`, 15, 60000)) {
       console.warn(`⚠️ Rate limit exceeded for recipient: ${recipient}`)
+      
+      // 📊 METRICS: Track rate limited email
+      await trackMetric('total_rate_limited_emails', 1)
+      
       return NextResponse.json(
         { error: 'Rate limit exceeded', recipient },
         { status: 429 }
@@ -223,6 +247,10 @@ export async function POST(request: NextRequest) {
     
     if (hasSuspiciousContent) {
       console.warn(`⚠️ Suspicious content detected from ${sender}`)
+      
+      // 📊 METRICS: Track suspicious email blocked
+      await trackMetric('total_suspicious_emails_blocked', 1)
+      
       return NextResponse.json(
         { error: 'Suspicious content detected', sender },
         { status: 400 }
@@ -255,6 +283,9 @@ export async function POST(request: NextRequest) {
       // 🔄 BOUNCING: Send bounce message via Mailgun API
       await sendBounceMessage(sender, recipient, subject, 'Mailbox unavailable', 
         'The email address you are trying to reach is not available.')
+      
+      // 📊 METRICS: Track bounce notification
+      await trackMetric('total_bounce_notifications', 1)
       
       // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
       // This tells Mailgun "email processed successfully, don't retry"
@@ -291,6 +322,9 @@ export async function POST(request: NextRequest) {
       // 🔄 BOUNCING: Send bounce message via Mailgun API
       await sendBounceMessage(sender, recipient, subject, 'Mailbox expired', 
         'The temporary email address has expired and is no longer accepting messages.')
+      
+      // 📊 METRICS: Track expired inbox bounce
+      await trackMetric('total_bounce_notifications', 1)
       
       // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
       return NextResponse.json(
@@ -365,6 +399,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`Email stored successfully: ${emailData.id}`)
+
+    // 📊 METRICS: Track successfully received email
+    await trackMetric('total_emails_received', 1)
 
     // Return success response
     return NextResponse.json({

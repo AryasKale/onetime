@@ -40,6 +40,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // 📊 METRICS: Track inbox creation and email generation
+    try {
+      await supabase.rpc('increment_metric', {
+        metric_name_param: 'total_inboxes_created',
+        increment_by: 1
+      })
+      await supabase.rpc('increment_metric', {
+        metric_name_param: 'total_emails_generated',
+        increment_by: 1
+      })
+    } catch (metricError) {
+      console.warn('Failed to track inbox creation metrics:', metricError)
+    }
+
     return NextResponse.json({
       success: true,
       id: data.id,
