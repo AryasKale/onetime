@@ -44,6 +44,7 @@ const nextConfig: NextConfig = {
 
   // Experimental features for better performance
   experimental: {
+    optimizeCss: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     webVitalsAttribution: ['CLS', 'LCP', 'FID', 'TTFB', 'FCP'],
   },
@@ -124,7 +125,7 @@ const nextConfig: NextConfig = {
       transform: '@heroicons/react/24/solid/{{member}}',
     },
   },
-
+  
   // Redirects for SEO
   async redirects() {
     return [
