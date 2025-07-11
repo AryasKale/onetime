@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
+// Configure dynamic route for client-side rendering
+export const dynamic = 'force-dynamic'
+
 // Types for email data
 type EmailData = {
   id: string
