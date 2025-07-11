@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface VitalsMetric {
   id: string
@@ -110,8 +110,14 @@ function observeTTFB(callback: (metric: VitalsMetric) => void) {
 }
 
 export default function WebVitals() {
+  const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return
     
     // Track Core Web Vitals with native implementations
     observeCLS(sendToAnalytics)
@@ -134,7 +140,7 @@ export default function WebVitals() {
         })
       })
     }
-  }, [])
+  }, [mounted])
 
   return null // This component doesn't render anything
 }

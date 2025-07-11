@@ -8,8 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,47 +21,62 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
 
-/* iOS Safari specific fixes */
-@supports (-webkit-backdrop-filter: none) or (backdrop-filter: none) {
-  .backdrop-blur-xl {
-    -webkit-backdrop-filter: blur(24px);
-    backdrop-filter: blur(24px);
-  }
+/* iOS-safe component classes */
+.ios-safe-card {
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
 
-/* Fallback for iOS devices that don't support backdrop-filter */
 @supports not ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
-  .backdrop-blur-xl {
-    background-color: rgba(255, 255, 255, 0.95);
+  .ios-safe-card {
+    background-color: rgba(255, 255, 255, 0.95) !important;
   }
 }
 
-/* iOS Safari button fixes */
+.ios-safe-step {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+.ios-safe-benefit {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.ios-safe-cta {
+  -webkit-background-clip: padding-box;
+  background-clip: padding-box;
+}
+
+.ios-safe-button {
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+/* Global iOS Safari fixes */
 button {
   -webkit-appearance: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
 }
 
-/* iOS Safari input fixes */
 input {
   -webkit-appearance: none;
   -webkit-border-radius: 0;
   border-radius: 0;
-}
-
-/* iOS Safari transform fixes */
-.transform {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
 }
 
 /* iOS Safari font smoothing */
@@ -76,6 +90,12 @@ input {
   -webkit-overflow-scrolling: touch;
 }
 
+/* iOS Safari transform fixes */
+.transform {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
 /* iOS Safari fixed positioning */
 .fixed {
   -webkit-transform: translateZ(0);
@@ -85,7 +105,7 @@ input {
 /* iOS Safari gradient fixes */
 .bg-gradient-to-r,
 .bg-gradient-to-br {
-  background-attachment: fixed;
+  background-attachment: scroll;
 }
 
 /* iOS Safari safe area handling */
