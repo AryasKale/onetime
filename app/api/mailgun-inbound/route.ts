@@ -2,6 +2,70 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabaseClient'
 import { createHmac } from 'crypto'
 
+// 📝 WEBHOOK BEHAVIOR:
+// This webhook processes incoming emails forwarded by Mailgun
+// When inbox not found, sends bounce message via Mailgun API
+
+// 🔄 BOUNCE MESSAGE FUNCTION
+async function sendBounceMessage(
+  originalSender: string,
+  originalRecipient: string,
+  originalSubject: string,
+  errorTitle: string,
+  errorMessage: string
+) {
+  try {
+    const mailgunApiKey = process.env.MAILGUN_API_KEY
+    const mailgunDomain = process.env.MAILGUN_DOMAIN || 'onetimeemail.net'
+    
+    if (!mailgunApiKey) {
+      console.warn('⚠️ MAILGUN_API_KEY not configured - cannot send bounce')
+      return false
+    }
+
+    const bounceSubject = `Mail Delivery Failure: ${originalSubject || '(No Subject)'}`
+    const bounceBody = `
+The following message could not be delivered:
+
+  To: ${originalRecipient}
+  From: ${originalSender}
+  Subject: ${originalSubject || '(No Subject)'}
+
+Error: ${errorTitle}
+${errorMessage}
+
+This is an automated message from the OneTimeEmail delivery system.
+    `.trim()
+
+    const mailgunUrl = `https://api.mailgun.net/v3/${mailgunDomain}/messages`
+    
+    const formData = new FormData()
+    formData.append('from', `Mail Delivery System <mailer-daemon@${mailgunDomain}>`)
+    formData.append('to', originalSender)
+    formData.append('subject', bounceSubject)
+    formData.append('text', bounceBody)
+
+    const response = await fetch(mailgunUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from(`api:${mailgunApiKey}`).toString('base64')}`
+      },
+      body: formData
+    })
+
+    if (response.ok) {
+      console.log(`✅ Bounce message sent to: ${originalSender}`)
+      return true
+    } else {
+      console.error(`❌ Failed to send bounce: ${response.statusText}`)
+      return false
+    }
+  } catch (error) {
+    console.error('❌ Error sending bounce message:', error)
+    return false
+  }
+}
+
 // 🛡️ SECURITY: Rate limiting storage (in production, use Redis)
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
 
@@ -188,15 +252,15 @@ export async function POST(request: NextRequest) {
       console.error(`🚫 BLOCKING EMAIL - Inbox not found: ${recipient}`)
       console.error(`🚫 Database error:`, inboxError)
       
-      // Return early - DO NOT PROCESS EMAIL
+      // 🔄 EASIEST BOUNCING: Send bounce message via Mailgun API
+      await sendBounceMessage(sender, recipient, subject, 'Mailbox unavailable', 
+        'The email address you are trying to reach is not available.')
+      
       return NextResponse.json(
         { 
-          error: 'Inbox not found or inactive', 
+          error: 'Inbox not found - bounce sent', 
           recipient,
-          debug: {
-            database_error: inboxError?.message,
-            inbox_exists: false
-          }
+          bounce_sent_to: sender
         },
         { status: 404 }
       )
@@ -219,8 +283,13 @@ export async function POST(request: NextRequest) {
     
     if (now > expiresAt) {
       console.error(`🚫 BLOCKING EMAIL - Inbox expired: ${recipient}`)
+      
+      // 🔄 EASIEST BOUNCING: Send bounce message via Mailgun API
+      await sendBounceMessage(sender, recipient, subject, 'Mailbox expired', 
+        'The temporary email address has expired and is no longer accepting messages.')
+      
       return NextResponse.json(
-        { error: 'Inbox has expired', recipient, expires_at: inboxData.expires_at },
+        { error: 'Inbox expired - bounce sent', recipient, expires_at: inboxData.expires_at, bounce_sent_to: sender },
         { status: 410 }
       )
     }

@@ -10,6 +10,14 @@ This document outlines all security measures implemented to protect your one-tim
 - Mailgun quota abuse
 - Infrastructure overload
 
+## 🔄 NEW: Email Bouncing Implementation
+
+**Enhancement:** The system now implements proper email bouncing to give senders feedback when emails are rejected:
+- **Senders get bounce notifications** when emails are rejected
+- **Clear error messages** explain why emails were rejected
+- **Professional email behavior** similar to real email servers
+- **Prevents confusion** for legitimate senders
+
 ## 🛡️ Multi-Layer Security Solution
 
 ### Layer 1: 🔐 HMAC Signature Verification
@@ -77,26 +85,26 @@ if (timeDiff > 300) // 5 minutes tolerance
 **Protection:** 
 - ✅ Email format validation passes
 - ❌ Database validation fails (inbox doesn't exist)
-- **Result:** Request rejected with 404
+- **Result:** Request rejected with 550, **sender gets bounce notification**
 
 ### Scenario 2: Spam Attack
 **Attack:** Sending 1000 emails to same inbox
 **Protection:**
 - ✅ First 15 emails processed
 - ❌ Subsequent emails blocked by rate limiting
-- **Result:** 429 Rate Limit Exceeded
+- **Result:** 451 Temporary Failure, **sender gets bounce notification**
 
 ### Scenario 3: Large Payload Attack
 **Attack:** Sending 10MB email to crash system
 **Protection:**
 - ❌ Size validation fails
-- **Result:** 413 Payload Too Large
+- **Result:** 552 Message Too Large, **sender gets bounce notification**
 
 ### Scenario 4: Malicious Content
 **Attack:** Email with `<script>alert('XSS')</script>`
 **Protection:**
 - ❌ Suspicious content detection triggers
-- **Result:** 400 Bad Request
+- **Result:** 554 Message Rejected, **sender gets bounce notification**
 
 ### Scenario 5: Fake Webhook
 **Attack:** Direct POST to webhook without Mailgun signature
@@ -183,14 +191,69 @@ await supabase.from('email_stats').insert({
 - [x] Email size validation (1MB limit)
 - [x] Suspicious content detection
 - [x] Timestamp validation (replay protection)
+- [x] Email bouncing (proper sender feedback)
 - [ ] IP-based rate limiting (recommended)
 - [ ] Redis rate limiting (production)
 - [ ] Mailgun route optimization
 - [ ] Monitoring alerts setup
 
+## 🔄 Email Bouncing Status Codes
+
+The system now returns proper SMTP-like status codes that trigger Mailgun to send bounce notifications:
+
+### Bounce Types:
+- **550**: Mailbox unavailable (inbox not found, expired, invalid format)
+- **552**: Message too large (exceeds 1MB limit)
+- **554**: Message rejected (suspicious content)
+- **451**: Temporary failure (rate limiting)
+
+### What Senders Receive:
+When someone sends an email to a non-existent inbox, they now get a bounce message like:
+```
+Subject: Mail Delivery Failure
+From: Mail Delivery Subsystem <mailer-daemon@onetimeemail.net>
+
+The following message could not be delivered:
+  To: random123@onetimeemail.net
+  Subject: Hello
+
+Error: Mailbox unavailable
+The email address you are trying to reach is not available.
+```
+
 ## 🔍 Testing Your Security
 
-### Test 1: Invalid Email Format
+### Test 1: Invalid Email Format (Should Bounce)
+```bash
+# Test sending to non-existent inbox
+curl -X POST https://onetimeemail.vercel.app/api/mailgun-inbound \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "recipient=nonexistent@onetimeemail.net&sender=test@example.com&subject=Test&body-plain=This should bounce"
+
+# Expected: 550 status code + bounce message
+```
+
+### Test 2: Oversized Email (Should Bounce)
+```bash
+# Test with large email (simulate)
+curl -X POST https://onetimeemail.vercel.app/api/mailgun-inbound \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "recipient=test123@onetimeemail.net&sender=test@example.com&subject=Large Email&body-plain=$(python -c 'print("A" * 1000000)')"
+
+# Expected: 552 status code + bounce message
+```
+
+### Test 3: Malicious Content (Should Bounce)
+```bash
+# Test with suspicious content
+curl -X POST https://onetimeemail.vercel.app/api/mailgun-inbound \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "recipient=test123@onetimeemail.net&sender=test@example.com&subject=Malicious&body-plain=<script>alert('XSS')</script>"
+
+# Expected: 554 status code + bounce message
+```
+
+### Test 4: Legacy Test (Invalid Email Format)
 ```bash
 # This should be blocked
 curl -X POST https://onetimeemail.vercel.app/api/mailgun-inbound \
