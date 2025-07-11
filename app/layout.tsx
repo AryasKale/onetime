@@ -67,9 +67,28 @@ export const metadata: Metadata = {
   verification: {
     google: 'your-google-site-verification-code',
   },
+  // iOS-specific meta tags
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'OneTimeEmail',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
-export const viewport: Viewport = generateAdvancedViewport();
+// iOS-optimized viewport configuration
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  // iOS-specific viewport settings
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
+  colorScheme: 'light',
+};
 
 export default function RootLayout({
   children,
@@ -80,6 +99,14 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <AdvancedSEO />
+        {/* iOS Safari specific meta tags */}
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="OneTimeEmail" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        
         {/* Preconnect to external domains for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -89,9 +116,27 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
         <link rel="dns-prefetch" href="//fonts.gstatic.com" />
         <link rel="dns-prefetch" href="//www.google-analytics.com" />
+        
+        {/* iOS Safari icon */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+        <link rel="manifest" href="/manifest.json" />
+        
+        {/* Prevent iOS Safari from auto-detecting phone numbers */}
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="format-detection" content="date=no" />
+        <meta name="format-detection" content="address=no" />
+        <meta name="format-detection" content="email=no" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white flex flex-col`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-white flex flex-col safe-area-padding`}
+        style={{
+          // iOS Safari body fixes
+          WebkitTextSizeAdjust: '100%',
+          WebkitFontSmoothing: 'antialiased',
+          textRendering: 'optimizeLegibility',
+        }}
       >
         <main className="flex-grow">
           {children}
