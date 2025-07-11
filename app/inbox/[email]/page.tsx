@@ -4,15 +4,8 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
 
-// Configure static generation for dynamic route
-export const dynamic = 'auto'
-export const dynamicParams = false
-
-// Generate static params for known routes
-export async function generateStaticParams() {
-  // Return empty array for now - this route will be handled dynamically
-  return []
-}
+// Configure dynamic route for client-side rendering
+export const dynamic = 'force-dynamic'
 
 // Types for email data
 type EmailData = {
