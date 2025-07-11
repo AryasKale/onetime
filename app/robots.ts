@@ -6,17 +6,17 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/inbox/*'],
+        disallow: ['/api/', '/admin/'],
       },
       {
         userAgent: 'Googlebot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/inbox/*'],
+        disallow: ['/api/', '/admin/'],
       },
       {
         userAgent: 'Bingbot',
         allow: '/',
-        disallow: ['/api/', '/admin/', '/inbox/*'],
+        disallow: ['/api/', '/admin/'],
       },
     ],
     sitemap: 'https://onetimeemail.net/sitemap.xml',
