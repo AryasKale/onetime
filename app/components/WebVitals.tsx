@@ -1,24 +1,19 @@
 'use client'
 
 import { useEffect } from 'react'
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals'
 
-interface VitalsMetric {
-  id: string
+interface SimpleMetric {
   name: string
   value: number
   rating: 'good' | 'needs-improvement' | 'poor'
-  delta: number
-  entries: PerformanceEntry[]
 }
 
-function sendToAnalytics(metric: VitalsMetric) {
+function sendToAnalytics(metric: SimpleMetric) {
   // Send to analytics service (replace with your preferred service)
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', metric.name, {
-      event_category: 'Web Vitals',
-      event_label: metric.id,
-      value: Math.round(metric.name === 'CLS' ? metric.value * 1000 : metric.value),
+      event_category: 'Performance',
+      value: Math.round(metric.value),
       custom_parameter_1: metric.rating,
       non_interaction: true,
     })
@@ -26,46 +21,71 @@ function sendToAnalytics(metric: VitalsMetric) {
   
   // Also log to console in development
   if (process.env.NODE_ENV === 'development') {
-    console.log('Web Vital:', metric.name, metric.value, metric.rating)
+    console.log('Performance Metric:', metric.name, metric.value, metric.rating)
   }
 }
 
 export default function WebVitals() {
   useEffect(() => {
-    // Track all Core Web Vitals
-    getCLS(sendToAnalytics)
-    getFID(sendToAnalytics)
-    getFCP(sendToAnalytics)
-    getLCP(sendToAnalytics)
-    getTTFB(sendToAnalytics)
-    
-    // Track custom performance metrics
+    // Track basic performance metrics without external dependencies
     if (typeof window !== 'undefined' && 'performance' in window) {
-      // Track page load time
-      window.addEventListener('load', () => {
-        const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
-        sendToAnalytics({
-          id: 'page-load-time',
-          name: 'Page Load Time',
-          value: loadTime,
-          rating: loadTime < 2000 ? 'good' : loadTime < 4000 ? 'needs-improvement' : 'poor',
-          delta: 0,
-          entries: []
-        })
-      })
       
-      // Track DOM content loaded
-      document.addEventListener('DOMContentLoaded', () => {
-        const domTime = performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart
-        sendToAnalytics({
-          id: 'dom-content-loaded',
-          name: 'DOM Content Loaded',
-          value: domTime,
-          rating: domTime < 1000 ? 'good' : domTime < 2000 ? 'needs-improvement' : 'poor',
-          delta: 0,
-          entries: []
+      // Track page load time
+      const trackPageLoad = () => {
+        const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+        if (navigation) {
+          const loadTime = navigation.loadEventEnd - navigation.fetchStart
+          sendToAnalytics({
+            name: 'Page Load Time',
+            value: loadTime,
+            rating: loadTime < 2000 ? 'good' : loadTime < 4000 ? 'needs-improvement' : 'poor'
+          })
+        }
+      }
+
+      // Track First Contentful Paint
+      const trackFCP = () => {
+        const paintEntries = performance.getEntriesByType('paint')
+        const fcpEntry = paintEntries.find(entry => entry.name === 'first-contentful-paint')
+        if (fcpEntry) {
+          sendToAnalytics({
+            name: 'First Contentful Paint',
+            value: fcpEntry.startTime,
+            rating: fcpEntry.startTime < 1800 ? 'good' : fcpEntry.startTime < 3000 ? 'needs-improvement' : 'poor'
+          })
+        }
+      }
+
+      // Track Largest Contentful Paint using PerformanceObserver
+      const trackLCP = () => {
+        try {
+          const observer = new PerformanceObserver((list) => {
+            const entries = list.getEntries()
+            const lastEntry = entries[entries.length - 1]
+            sendToAnalytics({
+              name: 'Largest Contentful Paint',
+              value: lastEntry.startTime,
+              rating: lastEntry.startTime < 2500 ? 'good' : lastEntry.startTime < 4000 ? 'needs-improvement' : 'poor'
+            })
+          })
+          observer.observe({ entryTypes: ['largest-contentful-paint'] })
+        } catch (e) {
+          // PerformanceObserver not supported
+        }
+      }
+
+      // Run measurements when page is loaded
+      if (document.readyState === 'complete') {
+        trackPageLoad()
+        trackFCP()
+        trackLCP()
+      } else {
+        window.addEventListener('load', () => {
+          trackPageLoad()
+          trackFCP()
+          trackLCP()
         })
-      })
+      }
     }
   }, [])
 
