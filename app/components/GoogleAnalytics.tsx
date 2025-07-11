@@ -1,16 +1,22 @@
 'use client'
 
 import Script from 'next/script'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 interface GoogleAnalyticsProps {
   GA_MEASUREMENT_ID?: string
 }
 
 export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-XXXXXXXXXX' }: GoogleAnalyticsProps) {
+  const [mounted, setMounted] = useState(false)
+
   useEffect(() => {
-    // Only load in production
-    if (process.env.NODE_ENV !== 'production') {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    // Only load in production and after mounting
+    if (process.env.NODE_ENV !== 'production' || !mounted) {
       return
     }
 
@@ -33,10 +39,10 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-XXXXXXXXXX' }: 
         page_path: window.location.pathname
       })
     }
-  }, [GA_MEASUREMENT_ID])
+  }, [GA_MEASUREMENT_ID, mounted])
 
-  // Don't render in development
-  if (process.env.NODE_ENV !== 'production') {
+  // Don't render in development or before mounting
+  if (process.env.NODE_ENV !== 'production' || !mounted) {
     return null
   }
 

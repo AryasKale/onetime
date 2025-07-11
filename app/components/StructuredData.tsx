@@ -1,4 +1,19 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
 export default function StructuredData() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return null
+  }
+
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

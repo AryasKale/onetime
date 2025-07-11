@@ -45,6 +45,12 @@ export default function InboxPage() {
   const [isOnline, setIsOnline] = useState(true)
   const [newEmailAlert, setNewEmailAlert] = useState<string | null>(null)
   const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure component is mounted (hydration fix)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   // Load inbox data on mount
   useEffect(() => {
@@ -97,12 +103,14 @@ export default function InboxPage() {
 
   // Countdown timer effect
   useEffect(() => {
-    if (inbox && timeRemaining > 0) {
+    if (inbox && timeRemaining > 0 && mounted) {
       const timer = setInterval(() => {
         setTimeRemaining(prev => {
           if (prev <= 1) {
             // Inbox expired - clean up localStorage
-            localStorage.removeItem('currentInbox')
+            if (typeof window !== 'undefined') {
+              localStorage.removeItem('currentInbox')
+            }
             setError('This inbox has expired - redirecting to home...')
             // Auto-redirect to home after 3 seconds
             setTimeout(() => {
@@ -116,20 +124,30 @@ export default function InboxPage() {
 
       return () => clearInterval(timer)
     }
-  }, [inbox, timeRemaining, router])
+  }, [inbox, timeRemaining, router, mounted])
 
   // Set up realtime subscription for emails with polling fallback
   useEffect(() => {
-    if (inbox?.id) {
+    if (inbox?.id && mounted) {
       setLoadingEmails(true)
 
       // Verify this inbox matches what's stored in localStorage
       try {
-        const storedInbox = localStorage.getItem('currentInbox')
-        if (storedInbox) {
-          const inboxData = JSON.parse(storedInbox)
-          if (inboxData.id !== inbox.id) {
-            // Different inbox than what's stored, update localStorage
+        if (typeof window !== 'undefined') {
+          const storedInbox = localStorage.getItem('currentInbox')
+          if (storedInbox) {
+            const inboxData = JSON.parse(storedInbox)
+            if (inboxData.id !== inbox.id) {
+              // Different inbox than what's stored, update localStorage
+              localStorage.setItem('currentInbox', JSON.stringify({
+                id: inbox.id,
+                address: inbox.email_address,
+                created_at: inbox.created_at,
+                expires_at: inbox.expires_at
+              }))
+            }
+          } else {
+            // No stored inbox, store this one
             localStorage.setItem('currentInbox', JSON.stringify({
               id: inbox.id,
               address: inbox.email_address,
@@ -137,14 +155,6 @@ export default function InboxPage() {
               expires_at: inbox.expires_at
             }))
           }
-        } else {
-          // No stored inbox, store this one
-          localStorage.setItem('currentInbox', JSON.stringify({
-            id: inbox.id,
-            address: inbox.email_address,
-            created_at: inbox.created_at,
-            expires_at: inbox.expires_at
-          }))
         }
       } catch (err) {
         console.error('Error managing localStorage:', err)
@@ -267,7 +277,7 @@ export default function InboxPage() {
         clearInterval(pollInterval)
       }
     }
-  }, [inbox?.id])
+  }, [inbox?.id, mounted])
 
   // Request notification permission & online status
   useEffect(() => {
@@ -364,7 +374,9 @@ export default function InboxPage() {
 
   // Generate new inbox (clears localStorage and goes to home)
   const generateNewInbox = () => {
-    localStorage.removeItem('currentInbox')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentInbox')
+    }
     router.push('/')
   }
 
@@ -391,6 +403,15 @@ export default function InboxPage() {
     ]
     const colorIndex = sender.charCodeAt(0) % colors.length
     return { initials, color: colors[colorIndex] }
+  }
+
+  // Don't render until mounted to prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="text-gray-900 text-xl">Loading...</div>
+      </div>
+    )
   }
 
   if (loading) {
