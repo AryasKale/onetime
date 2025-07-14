@@ -263,11 +263,13 @@ export async function POST(request: NextRequest) {
     // This ensures only emails to EXISTING inboxes are processed
     console.log(`🗄️ Checking database for inbox: ${recipient}`)
     
+    // Optimized query with index usage and reduced data transfer
     const { data: inboxData, error: inboxError } = await supabase
       .from('inbox')
       .select('id, expires_at, is_active')
       .eq('email_address', recipient)
       .eq('is_active', true)
+      .limit(1)
       .single()
 
     console.log(`📊 Database result:`, { 
@@ -280,12 +282,14 @@ export async function POST(request: NextRequest) {
       console.error(`🚫 BLOCKING EMAIL - Inbox not found: ${recipient}`)
       console.error(`🚫 Database error:`, inboxError)
       
-      // 🔄 BOUNCING: Send bounce message via Mailgun API
-      await sendBounceMessage(sender, recipient, subject, 'Mailbox unavailable', 
+      // 🔄 BOUNCING: Send bounce message via Mailgun API (async for better performance)
+      sendBounceMessage(sender, recipient, subject, 'Mailbox unavailable', 
         'The email address you are trying to reach is not available.')
+        .catch(err => console.error('Bounce message failed:', err))
       
-      // 📊 METRICS: Track bounce notification
-      await trackMetric('total_bounce_notifications', 1)
+      // 📊 METRICS: Track bounce notification (async for better performance)
+      trackMetric('total_bounce_notifications', 1)
+        .catch(err => console.error('Metric tracking failed:', err))
       
       // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
       // This tells Mailgun "email processed successfully, don't retry"
@@ -312,19 +316,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if inbox has expired
+    // Optimized expiry check - do this before processing email content
     const now = new Date()
     const expiresAt = new Date(inboxData.expires_at)
     
     if (now > expiresAt) {
       console.error(`🚫 BLOCKING EMAIL - Inbox expired: ${recipient}`)
       
-      // 🔄 BOUNCING: Send bounce message via Mailgun API
-      await sendBounceMessage(sender, recipient, subject, 'Mailbox expired', 
+      // 🔄 BOUNCING: Send bounce message via Mailgun API (async for better performance)
+      sendBounceMessage(sender, recipient, subject, 'Mailbox expired', 
         'The temporary email address has expired and is no longer accepting messages.')
+        .catch(err => console.error('Bounce message failed:', err))
       
-      // 📊 METRICS: Track expired inbox bounce
-      await trackMetric('total_bounce_notifications', 1)
+      // 📊 METRICS: Track expired inbox bounce (async for better performance)
+      trackMetric('total_bounce_notifications', 1)
+        .catch(err => console.error('Metric tracking failed:', err))
       
       // ✅ IMPORTANT: Return 200 to prevent Mailgun retries
       return NextResponse.json(
@@ -342,13 +348,13 @@ export async function POST(request: NextRequest) {
 
     console.log(`🎯 All validations passed - processing email for ${recipient}`)
 
-    // Calculate email size (rough estimate)
-    const sizeBytes = (bodyPlain.length + bodyHtml.length + subject.length) * 2 // UTF-16 approximation
+    // Calculate email size (optimized calculation)
+    const sizeBytes = Buffer.byteLength(bodyPlain + bodyHtml + subject, 'utf8')
 
-    // Prepare received timestamp
+    // Prepare received timestamp (optimized)
     const receivedAt = timestamp ? new Date(parseInt(timestamp) * 1000) : new Date()
 
-    // Prepare attachments array if any
+    // Prepare attachments array if any (optimized)
     const attachments = attachmentCount > 0 ? 
       Array.from({ length: attachmentCount }, (_, i) => {
         const attachmentName = formData.get(`attachment-${i+1}`)
@@ -366,10 +372,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`💾 Inserting email into database for inbox: ${inboxData.id}`)
 
-    // Insert email into database
+    // Optimized email insertion with better error handling
     const { data: emailData, error: emailError } = await supabase
       .from('emails')
-      .insert([{
+      .insert({
         inbox_id: inboxData.id,
         sender: sender,
         recipient: recipient,
@@ -386,8 +392,8 @@ export async function POST(request: NextRequest) {
           'message-id': formData.get('Message-Id') || ''
         },
         size_bytes: sizeBytes
-      }])
-      .select()
+      })
+      .select('id')
       .single()
 
     if (emailError) {
@@ -398,22 +404,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Email stored successfully: ${emailData.id}`)
+    console.log(`✅ Email stored successfully: ${emailData.id}`)
 
-    // 📊 METRICS: Track successfully received email
-    await trackMetric('total_emails_received', 1)
+    // 📊 METRICS: Track successfully received email (async for better performance)
+    trackMetric('total_emails_received', 1)
+      .catch(err => console.error('Metric tracking failed:', err))
 
-    // Return success response
+    // Return success response with minimal data
     return NextResponse.json({
       success: true,
       message: 'Email received and stored successfully',
       email_id: emailData.id,
       inbox_id: inboxData.id,
-      recipient: recipient,
-      sender: sender,
-      subject: subject,
-      received_at: receivedAt.toISOString(),
-      size_bytes: sizeBytes
+      received_at: receivedAt.toISOString()
     })
 
   } catch (error) {

@@ -3,6 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { supabase } from '@/lib/supabaseClient'
+import { 
+  fetchEmailsOptimized, 
+  EmailPerformanceMonitor, 
+  realtimeConfig,
+  clearEmailCache,
+  debounce
+} from '@/lib/email-performance'
 
 // Types for email data
 type EmailData = {
@@ -44,8 +51,11 @@ export default function InboxPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [isOnline, setIsOnline] = useState(true)
   const [newEmailAlert, setNewEmailAlert] = useState<string | null>(null)
-  const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
+  const [expandedEmails, setExpandedEmails] = new Set<string>()
   const [mounted, setMounted] = useState(false)
+  const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
+  const [emailsLoading, setEmailsLoading] = useState(false)
+  const [instantFeedback, setInstantFeedback] = useState<string | null>(null)
 
   // Ensure component is mounted (hydration fix)
   useEffect(() => {
@@ -167,6 +177,12 @@ export default function InboxPage() {
             presence: {
               key: inbox.id,
             },
+            broadcast: {
+              self: false,
+            },
+            postgres_changes: {
+              ack: true,
+            },
           },
         })
         .on(
@@ -180,23 +196,37 @@ export default function InboxPage() {
           (payload) => {
             console.log('🚀 New email received via realtime!', payload)
             const newEmail = payload.new as EmailData
+            
+            // Optimistic update - immediately add to UI
             setEmails(prev => {
               // Prevent duplicates
               const exists = prev.find(e => e.id === newEmail.id)
               if (exists) return prev
+              
+              // Add to beginning of array for immediate display
               return [newEmail, ...prev]
             })
             
-            // Show success alert
-            setNewEmailAlert(`📧 New email from ${newEmail.sender}`)
-            setTimeout(() => setNewEmailAlert(null), 5000)
+            // Show success alert with more details
+            setNewEmailAlert(`📧 New email from ${newEmail.sender.split('@')[0]}`)
+            setTimeout(() => setNewEmailAlert(null), 4000)
             
-            // Show browser notification
+            // Update last refresh timestamp
+            setLastRefresh(new Date())
+            
+            // Show browser notification with better formatting
             if ('Notification' in window && Notification.permission === 'granted') {
+              const senderName = newEmail.sender.split('@')[0]
+              const shortSubject = newEmail.subject?.length > 30 
+                ? newEmail.subject.substring(0, 30) + '...' 
+                : newEmail.subject || '(No Subject)'
+              
               new Notification('📧 New Email Received!', {
-                body: `From: ${newEmail.sender}\nSubject: ${newEmail.subject || '(No Subject)'}`,
+                body: `From: ${senderName}\n${shortSubject}`,
                 icon: '/favicon.ico',
-                tag: `email-${newEmail.id}` // Prevent duplicate notifications
+                tag: `email-${newEmail.id}`,
+                silent: false,
+                requireInteraction: false
               })
             }
           }
@@ -217,9 +247,20 @@ export default function InboxPage() {
                 email.id === updatedEmail.id ? updatedEmail : email
               )
             )
+            setLastRefresh(new Date())
           }
         )
-        .subscribe()
+        .on('system', {}, (payload) => {
+          console.log('🔌 Realtime system event:', payload)
+        })
+        .subscribe((status) => {
+          console.log('📡 Realtime subscription status:', status)
+          if (status === 'SUBSCRIBED') {
+            console.log('✅ Successfully subscribed to realtime updates')
+          } else if (status === 'CHANNEL_ERROR') {
+            console.error('❌ Realtime subscription error')
+          }
+        })
 
       // Load existing emails
       const loadEmails = async () => {
@@ -245,7 +286,7 @@ export default function InboxPage() {
 
       loadEmails()
 
-      // Polling fallback for faster updates (every 5 seconds)
+      // Polling fallback for faster updates (every 2 seconds)
       const pollInterval = setInterval(async () => {
         try {
           const { data, error } = await supabase
@@ -270,7 +311,7 @@ export default function InboxPage() {
         } catch (err) {
           console.error('Polling error:', err)
         }
-      }, 5000) // Poll every 5 seconds
+      }, 2000) // Poll every 2 seconds - FASTER UPDATES
 
       return () => {
         subscription.unsubscribe()
@@ -524,7 +565,7 @@ export default function InboxPage() {
                 </span>
               </div>
               <div className="text-gray-600">
-                🔄 Auto-refresh: 5s
+                🔄 Auto-refresh: 2s
               </div>
             </div>
             <div className="text-gray-600">
