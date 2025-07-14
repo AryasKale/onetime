@@ -41,7 +41,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-white flex flex-col font-sans antialiased">
         <main className="flex-grow">
-          {children}
+        {children}
         </main>
         <Footer />
       </body>

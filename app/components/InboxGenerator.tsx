@@ -37,6 +37,21 @@ export default function InboxGenerator() {
   const [timeRemaining, setTimeRemaining] = useState<number>(0)
   const [copied, setCopied] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
+
+  // Toggle email expansion
+  const toggleEmailExpansion = (emailId: string, event: React.MouseEvent) => {
+    event.stopPropagation() // Prevent other click handlers
+    setExpandedEmails(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(emailId)) {
+        newSet.delete(emailId)
+      } else {
+        newSet.add(emailId)
+      }
+      return newSet
+    })
+  }
 
   // Cross-tab coordination for inbox generation
   const generateInbox = async () => {
@@ -165,6 +180,24 @@ export default function InboxGenerator() {
     setCurrentInbox(null)
     setEmails([])
     setTimeRemaining(0)
+  }
+
+  // Mark email as read
+  const markEmailAsRead = async (emailId: string) => {
+    try {
+      await supabase
+        .from('emails')
+        .update({ is_read: true })
+        .eq('id', emailId)
+
+      setEmails(prev => 
+        prev.map(email => 
+          email.id === emailId ? { ...email, is_read: true } : email
+        )
+      )
+    } catch (err) {
+      console.error('Error marking email as read:', err)
+    }
   }
 
   // Initialize inbox on mount
@@ -347,27 +380,102 @@ export default function InboxGenerator() {
             </div>
           ) : (
             <div className="space-y-4">
-              {emails.map((email) => (
-                <div 
-                  key={email.id} 
-                  className={`bg-white/60 rounded-2xl p-4 border transition-all ${
-                    email.is_read ? 'border-gray-300' : 'border-blue-400 bg-blue-50'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-2">
-                    <span className="font-semibold text-gray-900">{email.sender}</span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(email.received_at).toLocaleString()}
-                    </span>
+              {emails.map((email) => {
+                const isExpanded = expandedEmails.has(email.id)
+                const emailBody = email.body || ''
+                const hasHtmlContent = email.html_body && email.html_body.trim() !== ''
+                const isLongEmail = emailBody.length > 150 || hasHtmlContent
+                const displayBody = isExpanded ? emailBody : emailBody.substring(0, 150)
+                const hasMeaningfulContent = emailBody.length > 0 || hasHtmlContent
+
+                return (
+                  <div 
+                    key={email.id} 
+                    className={`bg-white/60 rounded-2xl p-4 border transition-all cursor-pointer hover:bg-white/80 ${
+                      email.is_read ? 'border-gray-300' : 'border-blue-400 bg-blue-50'
+                    } ${isExpanded ? 'ring-2 ring-blue-200' : ''}`}
+                    onClick={() => markEmailAsRead(email.id)}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className="font-semibold text-gray-900">{email.sender}</span>
+                      <div className="flex items-center gap-2">
+                        {!email.is_read ? (
+                          <span className="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">NEW</span>
+                        ) : (
+                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">✓ Read</span>
+                        )}
+                        <span className="text-sm text-gray-500">
+                          {new Date(email.received_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="font-medium text-gray-800 mb-2">
+                      {email.subject || '(No Subject)'}
+                    </div>
+                    
+                    {/* Email Content */}
+                    {hasMeaningfulContent ? (
+                      <div className={`text-gray-600 text-sm leading-relaxed ${isExpanded && hasHtmlContent ? 'bg-gray-50 p-3 rounded-lg border-l-4 border-blue-400' : ''}`}>
+                        {isExpanded ? (
+                          // When expanded, show HTML if available, otherwise full plain text
+                          hasHtmlContent ? (
+                            <div 
+                              className="prose prose-sm max-w-none"
+                              dangerouslySetInnerHTML={{ __html: email.html_body }}
+                            />
+                          ) : (
+                            <div className="whitespace-pre-wrap">
+                              {emailBody}
+                            </div>
+                          )
+                        ) : (
+                          // When collapsed, show truncated plain text
+                          <div>
+                            {displayBody}
+                            {isLongEmail && '...'}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="text-gray-400 text-sm italic">
+                        No content available
+                      </div>
+                    )}
+                    
+                    {/* Read More/Less Button */}
+                    {hasMeaningfulContent && isLongEmail && (
+                      <div className="mt-3 flex items-center justify-between">
+                        <button
+                          onClick={(e) => toggleEmailExpansion(email.id, e)}
+                          className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors hover:underline"
+                        >
+                          {isExpanded ? (
+                            <>
+                              <span>📄</span> Show less
+                            </>
+                          ) : (
+                            <>
+                              <span>📖</span> {hasHtmlContent ? 'View full email' : 'Read more'}
+                            </>
+                          )}
+                        </button>
+                        {isExpanded && !hasHtmlContent && (
+                          <span className="text-xs text-gray-400">
+                            {emailBody.length} characters
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Attachments */}
+                    {email.attachments && email.attachments.length > 0 && (
+                      <div className="mt-3 flex items-center gap-2 text-amber-600 text-sm">
+                        📎 {email.attachments.length} attachment(s)
+                      </div>
+                    )}
                   </div>
-                  <div className="font-medium text-gray-800 mb-2">
-                    {email.subject || '(No Subject)'}
-                  </div>
-                  <div className="text-gray-600 text-sm">
-                    {email.body?.length > 100 ? `${email.body.substring(0, 100)}...` : email.body}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

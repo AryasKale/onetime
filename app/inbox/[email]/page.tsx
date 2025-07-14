@@ -109,7 +109,7 @@ export default function InboxPage() {
           if (prev <= 1) {
             // Inbox expired - clean up localStorage
             if (typeof window !== 'undefined') {
-              localStorage.removeItem('currentInbox')
+            localStorage.removeItem('currentInbox')
             }
             setError('This inbox has expired - redirecting to home...')
             // Auto-redirect to home after 3 seconds
@@ -134,26 +134,26 @@ export default function InboxPage() {
       // Verify this inbox matches what's stored in localStorage
       try {
         if (typeof window !== 'undefined') {
-          const storedInbox = localStorage.getItem('currentInbox')
-          if (storedInbox) {
-            const inboxData = JSON.parse(storedInbox)
-            if (inboxData.id !== inbox.id) {
-              // Different inbox than what's stored, update localStorage
-              localStorage.setItem('currentInbox', JSON.stringify({
-                id: inbox.id,
-                address: inbox.email_address,
-                created_at: inbox.created_at,
-                expires_at: inbox.expires_at
-              }))
-            }
-          } else {
-            // No stored inbox, store this one
+        const storedInbox = localStorage.getItem('currentInbox')
+        if (storedInbox) {
+          const inboxData = JSON.parse(storedInbox)
+          if (inboxData.id !== inbox.id) {
+            // Different inbox than what's stored, update localStorage
             localStorage.setItem('currentInbox', JSON.stringify({
               id: inbox.id,
               address: inbox.email_address,
               created_at: inbox.created_at,
               expires_at: inbox.expires_at
             }))
+          }
+        } else {
+          // No stored inbox, store this one
+          localStorage.setItem('currentInbox', JSON.stringify({
+            id: inbox.id,
+            address: inbox.email_address,
+            created_at: inbox.created_at,
+            expires_at: inbox.expires_at
+          }))
           }
         }
       } catch (err) {
@@ -375,7 +375,7 @@ export default function InboxPage() {
   // Generate new inbox (clears localStorage and goes to home)
   const generateNewInbox = () => {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('currentInbox')
+    localStorage.removeItem('currentInbox')
     }
     router.push('/')
   }
