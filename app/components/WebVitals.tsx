@@ -29,7 +29,7 @@ function sendToAnalytics(metric: VitalsMetric) {
   }
 }
 
-// Native Core Web Vitals implementation without external dependencies
+// Native Core Web Vitals implementation - NO EXTERNAL DEPENDENCIES
 function observeCLS(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -125,6 +125,31 @@ function observeTTFB(callback: (metric: VitalsMetric) => void) {
   }
 }
 
+// Native FID (First Input Delay) observer
+function observeFID(callback: (metric: VitalsMetric) => void) {
+  if (!('PerformanceObserver' in window)) return
+  
+  try {
+    new PerformanceObserver((entryList) => {
+      for (const entry of entryList.getEntries()) {
+        const fidEntry = entry as any // Type assertion for FID event timing
+        const fidValue = fidEntry.processingStart - fidEntry.startTime
+        
+        callback({
+          id: 'fid',
+          name: 'FID',
+          value: fidValue,
+          rating: fidValue < 100 ? 'good' : fidValue < 300 ? 'needs-improvement' : 'poor',
+          delta: fidValue,
+          entries: [entry]
+        })
+      }
+    }).observe({ type: 'first-input', buffered: true })
+  } catch (error) {
+    console.warn('FID observation failed:', error)
+  }
+}
+
 export default function WebVitals() {
   const [mounted, setMounted] = useState(false)
 
@@ -135,11 +160,12 @@ export default function WebVitals() {
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
     
-    // Track Core Web Vitals with native implementations
+    // Track Core Web Vitals with native implementations - NO EXTERNAL DEPENDENCIES
     observeCLS(sendToAnalytics)
     observeFCP(sendToAnalytics)
     observeLCP(sendToAnalytics)
     observeTTFB(sendToAnalytics)
+    observeFID(sendToAnalytics)
     
     // Track custom performance metrics
     if ('performance' in window) {
