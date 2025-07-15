@@ -12,7 +12,7 @@ interface VitalsMetric {
 }
 
 function sendToAnalytics(metric: VitalsMetric) {
-  // Send to analytics service (replace with your preferred service)
+  // Send to analytics service
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', metric.name, {
       event_category: 'Web Vitals',
@@ -23,13 +23,13 @@ function sendToAnalytics(metric: VitalsMetric) {
     })
   }
   
-  // Also log to console in development
+  // Log to console in development
   if (process.env.NODE_ENV === 'development') {
     console.log('Web Vital:', metric.name, metric.value, metric.rating)
   }
 }
 
-// Native Core Web Vitals implementation - NO EXTERNAL DEPENDENCIES
+// Native CLS observer
 function observeCLS(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -58,6 +58,7 @@ function observeCLS(callback: (metric: VitalsMetric) => void) {
   }
 }
 
+// Native FCP observer
 function observeFCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -81,6 +82,7 @@ function observeFCP(callback: (metric: VitalsMetric) => void) {
   }
 }
 
+// Native LCP observer
 function observeLCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -103,6 +105,7 @@ function observeLCP(callback: (metric: VitalsMetric) => void) {
   }
 }
 
+// Native TTFB observer
 function observeTTFB(callback: (metric: VitalsMetric) => void) {
   if (!('performance' in window) || !('timing' in performance)) return
   
@@ -125,14 +128,14 @@ function observeTTFB(callback: (metric: VitalsMetric) => void) {
   }
 }
 
-// Native FID (First Input Delay) observer
+// Native FID observer
 function observeFID(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
   try {
     new PerformanceObserver((entryList) => {
       for (const entry of entryList.getEntries()) {
-        const fidEntry = entry as any // Type assertion for FID event timing
+        const fidEntry = entry as any
         const fidValue = fidEntry.processingStart - fidEntry.startTime
         
         callback({
@@ -160,7 +163,7 @@ export default function WebVitals() {
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
     
-    // Track Core Web Vitals with native implementations - NO EXTERNAL DEPENDENCIES
+    // Track Core Web Vitals with native implementations
     observeCLS(sendToAnalytics)
     observeFCP(sendToAnalytics)
     observeLCP(sendToAnalytics)
@@ -169,7 +172,6 @@ export default function WebVitals() {
     
     // Track custom performance metrics
     if ('performance' in window) {
-      // Track page load time
       window.addEventListener('load', () => {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
         sendToAnalytics({
@@ -184,10 +186,10 @@ export default function WebVitals() {
     }
   }, [mounted])
 
-  return null // This component doesn't render anything
+  return null
 }
 
-// Extend Window interface for TypeScript
+// TypeScript declarations
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void

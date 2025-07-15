@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clear-cache": "node clear-cache.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.2",

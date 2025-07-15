@@ -51,7 +51,7 @@ export default function InboxPage() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [isOnline, setIsOnline] = useState(true)
   const [newEmailAlert, setNewEmailAlert] = useState<string | null>(null)
-  const [expandedEmails, setExpandedEmails] = new Set<string>()
+  const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
   const [mounted, setMounted] = useState(false)
   const [realtimeStatus, setRealtimeStatus] = useState<'connecting' | 'connected' | 'disconnected'>('connecting')
   const [emailsLoading, setEmailsLoading] = useState(false)
@@ -170,7 +170,7 @@ export default function InboxPage() {
         console.error('Error managing localStorage:', err)
       }
 
-      // Subscribe to realtime updates with enhanced settings
+      // Subscribe to realtime updates with correct configuration
       const subscription = supabase
         .channel(`emails-${inbox.id}`, {
           config: {
@@ -179,9 +179,6 @@ export default function InboxPage() {
             },
             broadcast: {
               self: false,
-            },
-            postgres_changes: {
-              ack: true,
             },
           },
         })
