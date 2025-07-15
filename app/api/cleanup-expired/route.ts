@@ -18,17 +18,17 @@ export async function POST(request: NextRequest) {
       total_inboxes_after: 0
     }
 
-    // 📊 Get current counts
-    const { data: emailCountBefore } = await supabase
+    // �� Get current counts (FIXED: Proper Supabase count syntax)
+    const { count: emailCountBefore } = await supabase
       .from('emails')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
     
-    const { data: inboxCountBefore } = await supabase
+    const { count: inboxCountBefore } = await supabase
       .from('inbox')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
 
-    results.total_emails_before = emailCountBefore?.length || 0
-    results.total_inboxes_before = inboxCountBefore?.length || 0
+    results.total_emails_before = emailCountBefore || 0
+    results.total_inboxes_before = inboxCountBefore || 0
 
     console.log(`📊 Current counts - Emails: ${results.total_emails_before}, Inboxes: ${results.total_inboxes_before}`)
 
@@ -41,6 +41,7 @@ export async function POST(request: NextRequest) {
 
     if (expiredError) {
       console.error('Error finding expired inboxes:', expiredError)
+      throw expiredError
     } else {
       console.log(`🔍 Found ${expiredInboxes?.length || 0} expired inboxes`)
     }
@@ -49,43 +50,54 @@ export async function POST(request: NextRequest) {
       // 🗑️ Step 2: Delete emails from expired inboxes
       const expiredInboxIds = expiredInboxes.map(inbox => inbox.id)
       
-      const { error: emailDeleteError, count: deletedEmailsCount } = await supabase
+      // First, count emails that will be deleted
+      const { count: emailsToDelete } = await supabase
+        .from('emails')
+        .select('*', { count: 'exact', head: true })
+        .in('inbox_id', expiredInboxIds)
+
+      console.log(`📧 Found ${emailsToDelete || 0} emails to delete from expired inboxes`)
+
+      // Delete the emails
+      const { error: emailDeleteError } = await supabase
         .from('emails')
         .delete()
         .in('inbox_id', expiredInboxIds)
 
       if (emailDeleteError) {
         console.error('Error deleting emails:', emailDeleteError)
+        throw emailDeleteError
       } else {
-        results.expired_emails_deleted = deletedEmailsCount || 0
+        results.expired_emails_deleted = emailsToDelete || 0
         console.log(`🗑️ Deleted ${results.expired_emails_deleted} emails from expired inboxes`)
       }
 
       // 🗑️ Step 3: Mark expired inboxes as inactive
-      const { error: inboxUpdateError, count: updatedInboxesCount } = await supabase
+      const { error: inboxUpdateError } = await supabase
         .from('inbox')
         .update({ is_active: false })
         .in('id', expiredInboxIds)
 
       if (inboxUpdateError) {
         console.error('Error updating expired inboxes:', inboxUpdateError)
+        throw inboxUpdateError
       } else {
-        results.expired_inboxes_cleaned = updatedInboxesCount || 0
+        results.expired_inboxes_cleaned = expiredInboxes.length
         console.log(`🗑️ Marked ${results.expired_inboxes_cleaned} inboxes as expired`)
       }
     }
 
     // 📊 Get counts after cleanup
-    const { data: emailCountAfter } = await supabase
+    const { count: emailCountAfter } = await supabase
       .from('emails')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
     
-    const { data: inboxCountAfter } = await supabase
+    const { count: inboxCountAfter } = await supabase
       .from('inbox')
-      .select('id', { count: 'exact', head: true })
+      .select('*', { count: 'exact', head: true })
 
-    results.total_emails_after = emailCountAfter?.length || 0
-    results.total_inboxes_after = inboxCountAfter?.length || 0
+    results.total_emails_after = emailCountAfter || 0
+    results.total_inboxes_after = inboxCountAfter || 0
 
     // 📊 Step 4: Update metrics
     await updateMetrics(results)
@@ -119,30 +131,68 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 📊 Function to update metrics
+// GET endpoint to check cleanup status
+export async function GET() {
+  try {
+    // Get current expired inboxes count
+    const { count: expiredCount } = await supabase
+      .from('inbox')
+      .select('*', { count: 'exact', head: true })
+      .lt('expires_at', new Date().toISOString())
+      .eq('is_active', true)
+
+    // Get total counts
+    const { count: totalEmails } = await supabase
+      .from('emails')
+      .select('*', { count: 'exact', head: true })
+
+    const { count: totalInboxes } = await supabase
+      .from('inbox')
+      .select('*', { count: 'exact', head: true })
+
+    const { count: activeInboxes } = await supabase
+      .from('inbox')
+      .select('*', { count: 'exact', head: true })
+      .eq('is_active', true)
+
+    return NextResponse.json({
+      success: true,
+      status: {
+        expired_inboxes_pending_cleanup: expiredCount || 0,
+        total_emails: totalEmails || 0,
+        total_inboxes: totalInboxes || 0,
+        active_inboxes: activeInboxes || 0,
+        inactive_inboxes: (totalInboxes || 0) - (activeInboxes || 0),
+        cleanup_needed: (expiredCount || 0) > 0
+      },
+      actions: {
+        manual_cleanup: "POST /api/cleanup-expired",
+        view_metrics: "GET /api/metrics"
+      }
+    })
+  } catch (error) {
+    console.error('Status check error:', error)
+    return NextResponse.json(
+      { error: 'Failed to check cleanup status', details: error },
+      { status: 500 }
+    )
+  }
+}
+
+// 📊 Function to update metrics with proper error handling
 async function updateMetrics(results: any) {
   try {
-    // Update cleanup metrics
-    await supabase.rpc('increment_metric', {
-      metric_name_param: 'total_expired_inboxes_cleaned',
-      increment_by: results.expired_inboxes_cleaned
-    })
+    console.log('📊 Updating metrics...')
 
-    await supabase.rpc('increment_metric', {
-      metric_name_param: 'total_expired_emails_deleted', 
-      increment_by: results.expired_emails_deleted
-    })
+    // Update cleanup metrics
+    if (results.expired_inboxes_cleaned > 0) {
+      await incrementMetric('total_expired_inboxes_cleaned', results.expired_inboxes_cleaned)
+      await incrementMetric('total_expired_emails_deleted', results.expired_emails_deleted)
+    }
 
     // Update current totals
-    await supabase.rpc('set_metric', {
-      metric_name_param: 'current_active_emails',
-      new_value: results.total_emails_after
-    })
-
-    await supabase.rpc('set_metric', {
-      metric_name_param: 'current_active_inboxes',
-      new_value: results.total_inboxes_after
-    })
+    await setMetric('current_active_emails', results.total_emails_after)
+    await setMetric('current_active_inboxes', results.total_inboxes_after)
 
     console.log('📊 Metrics updated successfully')
   } catch (error) {
@@ -150,54 +200,37 @@ async function updateMetrics(results: any) {
   }
 }
 
-// 📊 Function to track expired items
+// 📊 Function to track expired metrics
 async function trackExpiredMetrics(expiredInboxes: number, expiredEmails: number) {
   try {
-    // Track total expired inboxes
-    await supabase.rpc('increment_metric', {
-      metric_name_param: 'total_inboxes_expired',
-      increment_by: expiredInboxes
-    })
-
-    // Track total expired emails
-    await supabase.rpc('increment_metric', {
-      metric_name_param: 'total_emails_expired',
-      increment_by: expiredEmails
-    })
-
+    await incrementMetric('total_inboxes_expired', expiredInboxes)
+    await incrementMetric('total_emails_expired', expiredEmails)
     console.log(`📊 Tracked ${expiredInboxes} expired inboxes and ${expiredEmails} expired emails`)
   } catch (error) {
     console.error('Error tracking expired metrics:', error)
   }
 }
 
-// Handle GET requests with API info
-export async function GET() {
-  try {
-    // Get current metrics for display
-    const { data: metrics, error } = await supabase
-      .from('metrics')
-      .select('metric_name, metric_value, updated_at')
-      .order('metric_name')
+// Helper function to increment metrics
+async function incrementMetric(metricName: string, incrementBy: number = 1) {
+  const { error } = await supabase.rpc('increment_metric', {
+    metric_name_param: metricName,
+    increment_by: incrementBy
+  })
+  
+  if (error) {
+    console.error(`Error incrementing metric ${metricName}:`, error)
+  }
+}
 
-    return NextResponse.json({
-      message: 'Cleanup & Metrics API',
-      endpoint: '/api/cleanup-expired',
-      methods: {
-        POST: 'Run cleanup process',
-        GET: 'View current metrics'
-      },
-      description: 'Cleans up expired emails and inboxes, tracks statistics',
-      current_metrics: metrics || [],
-      usage: {
-        manual_cleanup: 'POST to this endpoint to run cleanup',
-        automated: 'Set up cron job to call this endpoint daily'
-      }
-    })
-  } catch (error) {
-    return NextResponse.json({
-      message: 'Cleanup & Metrics API',
-      error: 'Could not fetch current metrics'
-    })
+// Helper function to set metrics
+async function setMetric(metricName: string, newValue: number) {
+  const { error } = await supabase.rpc('set_metric', {
+    metric_name_param: metricName,
+    new_value: newValue
+  })
+  
+  if (error) {
+    console.error(`Error setting metric ${metricName}:`, error)
   }
 } 

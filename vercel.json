@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cleanup-expired",
+      "schedule": "0 3 * * *"
+    }
+  ],
+  "functions": {
+    "app/api/cleanup-expired/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/mailgun-inbound/route.ts": {
+      "maxDuration": 30
+    }
+  }
+} 
