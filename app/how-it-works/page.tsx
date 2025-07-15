@@ -159,73 +159,7 @@ export default function HowItWorksPage() {
             </div>
           </section>
 
-          {/* Technical Details */}
-          <section className="mb-20">
-            <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">
-              Behind the Scenes
-            </h2>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200 shadow-xl">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-                  <span>⚙️</span> Technical Process
-                </h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-1">1</div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Random Generation</h4>
-                      <p className="text-gray-600 text-sm">Cryptographically secure random string generation</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-1">2</div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Database Storage</h4>
-                      <p className="text-gray-600 text-sm">Encrypted temporary storage in secure database</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-1">3</div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Email Routing</h4>
-                      <p className="text-gray-600 text-sm">Mailgun routes incoming emails to your inbox</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-1">4</div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900">Auto Cleanup</h4>
-                      <p className="text-gray-600 text-sm">Automated deletion after 10-minute expiration</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
 
-              <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200 shadow-xl">
-                <h3 className="text-2xl font-semibold text-gray-900 mb-6 flex items-center gap-3">
-                  <span>🔐</span> Security Features
-                </h3>
-                <div className="space-y-4">
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">HTTPS Encryption</h4>
-                    <p className="text-gray-600 text-sm">All communications protected with TLS 1.3 encryption</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Rate Limiting</h4>
-                    <p className="text-gray-600 text-sm">Protection against spam and abuse with intelligent limits</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Content Filtering</h4>
-                    <p className="text-gray-600 text-sm">Automatic detection and blocking of malicious content</p>
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-2">Secure Deletion</h4>
-                    <p className="text-gray-600 text-sm">Cryptographic erasure ensures data cannot be recovered</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
 
           {/* Use Cases */}
           <section className="mb-20">

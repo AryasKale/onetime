@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
   },
   
+  // Turbopack configuration (stable)
+  turbopack: {
+    resolveAlias: {
+      'web-vitals': './lib/web-vitals-stub.ts',
+    },
+  },
+  
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react'],
@@ -32,17 +39,16 @@ const nextConfig: NextConfig = {
             value: 'DENY',
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
           },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
           {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
           },
         ],
       },

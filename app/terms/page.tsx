@@ -307,17 +307,17 @@ export default function TermsPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-gray-900">General Questions</h3>
-                  <p className="text-gray-700">Email: support@onetimeemail.net</p>
+                  <p className="text-gray-700">Email: onetimeemailsaas@gmail.com</p>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold text-gray-900">Legal Issues</h3>
-                  <p className="text-gray-700">Email: legal@onetimeemail.net</p>
+                  <p className="text-gray-700">Email: onetimeemailsaas@gmail.com</p>
                 </div>
                 
                 <div>
                   <h3 className="font-semibold text-gray-900">Abuse Reports</h3>
-                  <p className="text-gray-700">Email: abuse@onetimeemail.net</p>
+                  <p className="text-gray-700">Email: onetimeemailsaas@gmail.com</p>
                 </div>
               </div>
             </div>

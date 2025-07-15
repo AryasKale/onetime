@@ -162,33 +162,7 @@ export default function AboutPage() {
             </div>
           </section>
 
-          <section className="mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 mb-8">Technical Excellence</h2>
-            <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200 shadow-xl">
-              <p className="text-lg text-gray-700 leading-relaxed mb-6">
-                OneTimeEmail is built on modern, secure technology stack ensuring reliability, 
-                speed, and security:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Frontend</h4>
-                  <p className="text-sm text-gray-600">Next.js 15, TypeScript, Tailwind CSS</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Backend</h4>
-                  <p className="text-sm text-gray-600">Serverless API, Edge Functions</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Database</h4>
-                  <p className="text-sm text-gray-600">PostgreSQL, Supabase</p>
-                </div>
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-semibold text-gray-900 mb-2">Email</h4>
-                  <p className="text-sm text-gray-600">Mailgun, SMTP</p>
-                </div>
-              </div>
-            </div>
-          </section>
+
 
           <section className="mb-16">
             <h2 className="text-3xl font-bold text-gray-900 mb-8">Get Started Today</h2>

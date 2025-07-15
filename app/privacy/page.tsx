@@ -324,7 +324,7 @@ export default function PrivacyPage() {
                   <ul className="space-y-2 text-gray-700">
                     <li>• Check our <Link href="/faq" className="text-blue-600 hover:text-blue-800">FAQ page</Link></li>
                     <li>• Review our <Link href="/about" className="text-blue-600 hover:text-blue-800">About page</Link></li>
-                    <li>• Email: privacy@onetimeemail.net</li>
+                    <li>• Email: onetimeemailsaas@gmail.com</li>
                   </ul>
                 </div>
                 

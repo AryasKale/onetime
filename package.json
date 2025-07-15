@@ -6,7 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "clear-cache": "node clear-cache.js",
+    "cleanup": "node scripts/cleanup-now.js",
+    "cleanup:prod": "CLEANUP_URL=https://your-domain.com/api/cleanup-expired node scripts/cleanup-now.js",
+    "db:setup": "echo 'Run database scripts in Supabase SQL Editor:\\n1. database/06_create_metrics_table.sql\\n2. database/07_cleanup_functions.sql'"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.50.2",

@@ -12,7 +12,6 @@ interface VitalsMetric {
 }
 
 function sendToAnalytics(metric: VitalsMetric) {
-  // Send to analytics service (replace with your preferred service)
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', metric.name, {
       event_category: 'Web Vitals',
@@ -23,90 +22,104 @@ function sendToAnalytics(metric: VitalsMetric) {
     })
   }
   
-  // Also log to console in development
   if (process.env.NODE_ENV === 'development') {
     console.log('Web Vital:', metric.name, metric.value, metric.rating)
   }
 }
 
-// Native Core Web Vitals implementation
 function observeCLS(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
   let clsValue = 0
   let clsEntries: PerformanceEntry[] = []
   
-  new PerformanceObserver((entryList) => {
-    for (const entry of entryList.getEntries()) {
-      if ((entry as any).hadRecentInput) continue
-      clsValue += (entry as any).value
-      clsEntries.push(entry)
-    }
-    
-    callback({
-      id: 'cls',
-      name: 'CLS',
-      value: clsValue,
-      rating: clsValue < 0.1 ? 'good' : clsValue < 0.25 ? 'needs-improvement' : 'poor',
-      delta: clsValue,
-      entries: clsEntries
-    })
-  }).observe({ type: 'layout-shift', buffered: true })
+  try {
+    new PerformanceObserver((entryList) => {
+      for (const entry of entryList.getEntries()) {
+        if ((entry as any).hadRecentInput) continue
+        clsValue += (entry as any).value
+        clsEntries.push(entry)
+      }
+      
+      callback({
+        id: 'cls',
+        name: 'CLS',
+        value: clsValue,
+        rating: clsValue < 0.1 ? 'good' : clsValue < 0.25 ? 'needs-improvement' : 'poor',
+        delta: clsValue,
+        entries: clsEntries
+      })
+    }).observe({ type: 'layout-shift', buffered: true })
+  } catch (error) {
+    console.warn('CLS observation failed:', error)
+  }
 }
 
 function observeFCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
-  new PerformanceObserver((entryList) => {
-    for (const entry of entryList.getEntries()) {
-      if (entry.name === 'first-contentful-paint') {
-        callback({
-          id: 'fcp',
-          name: 'FCP',
-          value: entry.startTime,
-          rating: entry.startTime < 1800 ? 'good' : entry.startTime < 3000 ? 'needs-improvement' : 'poor',
-          delta: entry.startTime,
-          entries: [entry]
-        })
+  try {
+    new PerformanceObserver((entryList) => {
+      for (const entry of entryList.getEntries()) {
+        if (entry.name === 'first-contentful-paint') {
+          callback({
+            id: 'fcp',
+            name: 'FCP',
+            value: entry.startTime,
+            rating: entry.startTime < 1800 ? 'good' : entry.startTime < 3000 ? 'needs-improvement' : 'poor',
+            delta: entry.startTime,
+            entries: [entry]
+          })
+        }
       }
-    }
-  }).observe({ type: 'paint', buffered: true })
+    }).observe({ type: 'paint', buffered: true })
+  } catch (error) {
+    console.warn('FCP observation failed:', error)
+  }
 }
 
 function observeLCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
-  new PerformanceObserver((entryList) => {
-    const entries = entryList.getEntries()
-    const lastEntry = entries[entries.length - 1]
-    
-    callback({
-      id: 'lcp',
-      name: 'LCP', 
-      value: lastEntry.startTime,
-      rating: lastEntry.startTime < 2500 ? 'good' : lastEntry.startTime < 4000 ? 'needs-improvement' : 'poor',
-      delta: lastEntry.startTime,
-      entries: [lastEntry]
-    })
-  }).observe({ type: 'largest-contentful-paint', buffered: true })
+  try {
+    new PerformanceObserver((entryList) => {
+      const entries = entryList.getEntries()
+      const lastEntry = entries[entries.length - 1]
+      
+      callback({
+        id: 'lcp',
+        name: 'LCP', 
+        value: lastEntry.startTime,
+        rating: lastEntry.startTime < 2500 ? 'good' : lastEntry.startTime < 4000 ? 'needs-improvement' : 'poor',
+        delta: lastEntry.startTime,
+        entries: [lastEntry]
+      })
+    }).observe({ type: 'largest-contentful-paint', buffered: true })
+  } catch (error) {
+    console.warn('LCP observation failed:', error)
+  }
 }
 
 function observeTTFB(callback: (metric: VitalsMetric) => void) {
   if (!('performance' in window) || !('timing' in performance)) return
   
-  window.addEventListener('load', () => {
-    const { responseStart, navigationStart } = performance.timing
-    const ttfb = responseStart - navigationStart
-    
-    callback({
-      id: 'ttfb',
-      name: 'TTFB',
-      value: ttfb,
-      rating: ttfb < 800 ? 'good' : ttfb < 1800 ? 'needs-improvement' : 'poor',
-      delta: ttfb,
-      entries: []
+  try {
+    window.addEventListener('load', () => {
+      const { responseStart, navigationStart } = performance.timing
+      const ttfb = responseStart - navigationStart
+      
+      callback({
+        id: 'ttfb',
+        name: 'TTFB',
+        value: ttfb,
+        rating: ttfb < 800 ? 'good' : ttfb < 1800 ? 'needs-improvement' : 'poor',
+        delta: ttfb,
+        entries: []
+      })
     })
-  })
+  } catch (error) {
+    console.warn('TTFB observation failed:', error)
+  }
 }
 
 export default function WebVitals() {
@@ -119,15 +132,12 @@ export default function WebVitals() {
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
     
-    // Track Core Web Vitals with native implementations
     observeCLS(sendToAnalytics)
     observeFCP(sendToAnalytics)
     observeLCP(sendToAnalytics)
     observeTTFB(sendToAnalytics)
     
-    // Track custom performance metrics
     if ('performance' in window) {
-      // Track page load time
       window.addEventListener('load', () => {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
         sendToAnalytics({
@@ -142,10 +152,9 @@ export default function WebVitals() {
     }
   }, [mounted])
 
-  return null // This component doesn't render anything
+  return null
 }
 
-// Extend Window interface for TypeScript
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void
