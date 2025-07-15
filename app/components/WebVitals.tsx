@@ -12,7 +12,6 @@ interface VitalsMetric {
 }
 
 function sendToAnalytics(metric: VitalsMetric) {
-  // Send to analytics service
   if (typeof window !== 'undefined' && window.gtag) {
     window.gtag('event', metric.name, {
       event_category: 'Web Vitals',
@@ -23,13 +22,11 @@ function sendToAnalytics(metric: VitalsMetric) {
     })
   }
   
-  // Log to console in development
   if (process.env.NODE_ENV === 'development') {
     console.log('Web Vital:', metric.name, metric.value, metric.rating)
   }
 }
 
-// Native CLS observer
 function observeCLS(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -58,7 +55,6 @@ function observeCLS(callback: (metric: VitalsMetric) => void) {
   }
 }
 
-// Native FCP observer
 function observeFCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -82,7 +78,6 @@ function observeFCP(callback: (metric: VitalsMetric) => void) {
   }
 }
 
-// Native LCP observer
 function observeLCP(callback: (metric: VitalsMetric) => void) {
   if (!('PerformanceObserver' in window)) return
   
@@ -105,7 +100,6 @@ function observeLCP(callback: (metric: VitalsMetric) => void) {
   }
 }
 
-// Native TTFB observer
 function observeTTFB(callback: (metric: VitalsMetric) => void) {
   if (!('performance' in window) || !('timing' in performance)) return
   
@@ -128,31 +122,6 @@ function observeTTFB(callback: (metric: VitalsMetric) => void) {
   }
 }
 
-// Native FID observer
-function observeFID(callback: (metric: VitalsMetric) => void) {
-  if (!('PerformanceObserver' in window)) return
-  
-  try {
-    new PerformanceObserver((entryList) => {
-      for (const entry of entryList.getEntries()) {
-        const fidEntry = entry as any
-        const fidValue = fidEntry.processingStart - fidEntry.startTime
-        
-        callback({
-          id: 'fid',
-          name: 'FID',
-          value: fidValue,
-          rating: fidValue < 100 ? 'good' : fidValue < 300 ? 'needs-improvement' : 'poor',
-          delta: fidValue,
-          entries: [entry]
-        })
-      }
-    }).observe({ type: 'first-input', buffered: true })
-  } catch (error) {
-    console.warn('FID observation failed:', error)
-  }
-}
-
 export default function WebVitals() {
   const [mounted, setMounted] = useState(false)
 
@@ -163,14 +132,11 @@ export default function WebVitals() {
   useEffect(() => {
     if (!mounted || typeof window === 'undefined') return
     
-    // Track Core Web Vitals with native implementations
     observeCLS(sendToAnalytics)
     observeFCP(sendToAnalytics)
     observeLCP(sendToAnalytics)
     observeTTFB(sendToAnalytics)
-    observeFID(sendToAnalytics)
     
-    // Track custom performance metrics
     if ('performance' in window) {
       window.addEventListener('load', () => {
         const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart
@@ -189,7 +155,6 @@ export default function WebVitals() {
   return null
 }
 
-// TypeScript declarations
 declare global {
   interface Window {
     gtag?: (...args: any[]) => void
