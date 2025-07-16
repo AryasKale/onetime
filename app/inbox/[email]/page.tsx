@@ -410,13 +410,7 @@ export default function InboxPage() {
     }
   }
 
-  // Generate new inbox (clears localStorage and goes to home)
-  const generateNewInbox = () => {
-    if (typeof window !== 'undefined') {
-    localStorage.removeItem('currentInbox')
-    }
-    router.push('/')
-  }
+
 
   // Toggle email expansion
   const toggleEmailExpansion = (emailId: string, event: React.MouseEvent) => {
@@ -465,11 +459,12 @@ export default function InboxPage() {
       <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="text-red-600 text-xl mb-4">{error}</div>
+          <p className="text-gray-600 mb-4">A new inbox will be automatically generated for you.</p>
           <button
             onClick={() => router.push('/')}
             className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-colors"
           >
-            Generate New Inbox
+            Return to Home
           </button>
         </div>
       </div>
@@ -542,12 +537,6 @@ export default function InboxPage() {
                 }`}
               >
                 {loadingEmails ? '🔄 Refreshing...' : '🔄 Refresh'}
-              </button>
-              <button
-                onClick={generateNewInbox}
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 shadow-md"
-              >
-                ✨ New Inbox
               </button>
             </div>
           </div>
