@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Footer from "./components/Footer";
+import GoogleAnalytics from "./components/GoogleAnalytics";
 
 // Simplified, iOS-safe metadata
 export const metadata: Metadata = {
@@ -40,6 +41,7 @@ export default function RootLayout({
         <meta name="format-detection" content="telephone=no" />
       </head>
       <body className="min-h-screen bg-white flex flex-col font-sans antialiased">
+        <GoogleAnalytics GA_MEASUREMENT_ID="G-DCD15YJ0R5" />
         <main className="flex-grow">
         {children}
         </main>

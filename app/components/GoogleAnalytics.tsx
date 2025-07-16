@@ -7,7 +7,7 @@ interface GoogleAnalyticsProps {
   GA_MEASUREMENT_ID?: string
 }
 
-export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-XXXXXXXXXX' }: GoogleAnalyticsProps) {
+export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: GoogleAnalyticsProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
