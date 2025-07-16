@@ -351,17 +351,10 @@ export default function InboxGenerator() {
 
           <div className="flex gap-3">
             <button
-              onClick={generateInbox}
-              disabled={loading}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105"
-            >
-              {loading ? 'Creating...' : '🔄 New Inbox'}
-            </button>
-            <button
               onClick={deleteInbox}
-              className="bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105"
+              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105"
             >
-              🗑️ Delete
+              🗑️ Delete Inbox
             </button>
           </div>
         </div>
