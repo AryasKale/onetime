@@ -38,6 +38,8 @@ export default function InboxGenerator() {
   const [copied, setCopied] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
   const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
+  const [testEmailCount, setTestEmailCount] = useState(0)
+  const [sendingTestEmail, setSendingTestEmail] = useState(false)
 
   // Toggle email expansion
   const toggleEmailExpansion = (emailId: string, event: React.MouseEvent) => {
@@ -302,6 +304,55 @@ export default function InboxGenerator() {
     }
   }, [currentInbox?.id])
 
+  // Check how many test emails were already sent for this inbox
+  useEffect(() => {
+    if (currentInbox?.id && isInitialized) {
+      const testEmailKey = `testEmailCount_${currentInbox.id}`
+      const count = parseInt(localStorage.getItem(testEmailKey) || '0', 10)
+      setTestEmailCount(count)
+    }
+  }, [currentInbox?.id, isInitialized])
+
+  // Send test email
+  const sendTestEmail = async () => {
+    if (!currentInbox?.id || testEmailCount >= 5 || sendingTestEmail) return
+    
+    setSendingTestEmail(true)
+    try {
+      const response = await fetch('/api/test-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ inbox_id: currentInbox.id })
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to send test email')
+      }
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        // Increment test email count for this inbox
+        const newCount = testEmailCount + 1
+        const testEmailKey = `testEmailCount_${currentInbox.id}`
+        localStorage.setItem(testEmailKey, newCount.toString())
+        setTestEmailCount(newCount)
+        
+        // Refresh emails to show the new test email
+        if (currentInbox.id) {
+          loadEmails(currentInbox.id)
+        }
+      }
+    } catch (err) {
+      console.error('Error sending test email:', err)
+      alert('Failed to send test email')
+    } finally {
+      setSendingTestEmail(false)
+    }
+  }
+
   // Show loading until initialized
   if (!isInitialized) {
     return (
@@ -361,9 +412,45 @@ export default function InboxGenerator() {
 
         {/* Emails Section */}
         <div className="ios-safe-card bg-white/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 border border-gray-200 shadow-2xl">
-          <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">
-            📬 Received Emails ({emails.length})
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900">
+              📬 Received Emails ({emails.length})
+            </h3>
+            <button
+              onClick={sendTestEmail}
+              disabled={sendingTestEmail || testEmailCount >= 5}
+              className={`px-4 md:px-6 py-2 md:py-3 rounded-xl font-medium transition-all transform hover:scale-105 text-sm md:text-base ${
+                testEmailCount >= 5 
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
+                  : sendingTestEmail
+                  ? 'bg-orange-400 text-white cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-600 text-white shadow-md'
+              }`}
+              title={testEmailCount >= 5 ? `Maximum 5 test emails reached (${testEmailCount}/5)` : `Send a test email (${testEmailCount}/5 used)`}
+            >
+              {testEmailCount >= 5 
+                ? '✅ Limit Reached' 
+                : sendingTestEmail 
+                ? '📤 Sending...' 
+                : `📧 Send Test Email (${5 - testEmailCount} left)`
+              }
+            </button>
+          </div>
+
+          {/* Test Email Status Message */}
+          {testEmailCount > 0 && (
+            <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded-xl text-blue-700 text-sm">
+              <div className="flex items-center gap-2">
+                <span>ℹ️</span>
+                <span>
+                  {testEmailCount >= 5 
+                    ? 'Maximum 5 test emails reached for this inbox.' 
+                    : `${testEmailCount} of 5 test emails used. ${5 - testEmailCount} remaining.`
+                  }
+                </span>
+              </div>
+            </div>
+          )}
 
           {emails.length === 0 ? (
             <div className="text-center py-12">
