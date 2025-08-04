@@ -182,6 +182,23 @@ export default function InboxGenerator() {
     setTimeRemaining(0)
   }
 
+  // Add 10 more minutes (grace period)
+  const addGracePeriod = () => {
+    if (currentInbox && timeRemaining > 0) {
+      const newTimeRemaining = 600 // Reset to exactly 10 minutes (600 seconds)
+      setTimeRemaining(newTimeRemaining)
+
+      // Update the expiration time in localStorage
+      const newExpiresAt = new Date(Date.now() + newTimeRemaining * 1000)
+      const updatedInbox = {
+        ...currentInbox,
+        expires_at: newExpiresAt.toISOString()
+      }
+      setCurrentInbox(updatedInbox)
+      localStorage.setItem('currentInbox', JSON.stringify(updatedInbox))
+    }
+  }
+
   // Mark email as read
   const markEmailAsRead = async (emailId: string) => {
     try {
@@ -352,9 +369,21 @@ export default function InboxGenerator() {
           <div className="flex gap-3">
             <button
               onClick={deleteInbox}
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-6 rounded-xl font-medium transition-all transform hover:scale-105"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-xl font-medium transition-all transform hover:scale-105 text-sm"
             >
-              🗑️ Delete Inbox
+              🗑️ Delete
+            </button>
+            <button
+              onClick={addGracePeriod}
+              disabled={timeRemaining <= 0}
+              className={`flex-1 py-2 px-3 rounded-xl font-medium transition-all transform hover:scale-105 text-sm ${
+                timeRemaining <= 0
+                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
+                  : 'bg-green-500 hover:bg-green-600 text-white shadow-md'
+              }`}
+              title={timeRemaining <= 0 ? 'Cannot extend expired inbox' : 'Add 10 more minutes to this inbox'}
+            >
+              ⏰ +10 min
             </button>
           </div>
         </div>
