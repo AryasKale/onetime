@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { getTrackingData, setLastInboxCreation } from '@/lib/userUtils'
 
 // Types for our inbox data
 type InboxData = {
@@ -82,11 +83,15 @@ export default function InboxGenerator() {
     setError(null)
 
     try {
+      // Get tracking data for bot detection
+      const trackingData = getTrackingData()
+      
       const response = await fetch('/api/create-inbox', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        body: JSON.stringify(trackingData)
       })
 
       if (!response.ok) {
@@ -116,6 +121,9 @@ export default function InboxGenerator() {
       setCurrentInbox(inboxData)
       calculateTimeRemaining(data.expires_at)
       loadEmails(data.id)
+      
+      // Update last creation time for rate limiting
+      setLastInboxCreation()
       
     } catch (err) {
       console.error('Inbox generation error:', err)
