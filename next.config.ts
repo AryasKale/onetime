@@ -60,33 +60,33 @@ const nextConfig: NextConfig = {
             key: 'Strict-Transport-Security',
             value: 'max-age=31536000; includeSubDomains; preload',
           },
-          // COOP - Cross-Origin Opener Policy  
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          // COEP - Cross-Origin Embedder Policy
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'credentialless',
-          },
-          // CSP - Content Security Policy (allows Google Analytics)
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
-              "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com",
-              "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com",
-              "style-src 'self' 'unsafe-inline'",
-              "font-src 'self' data:",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
-            ].join('; '),
-          },
+          // COOP - Cross-Origin Opener Policy (temporarily disabled for debugging)
+          // {
+          //   key: 'Cross-Origin-Opener-Policy',
+          //   value: 'same-origin',
+          // },
+          // COEP - Cross-Origin Embedder Policy (temporarily disabled for debugging)
+          // {
+          //   key: 'Cross-Origin-Embedder-Policy',
+          //   value: 'credentialless',
+          // },
+          // CSP - Content Security Policy (temporarily disabled for debugging)
+          // {
+          //   key: 'Content-Security-Policy',
+          //   value: [
+          //     "default-src 'self'",
+          //     "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+          //     "connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com",
+          //     "img-src 'self' data: https://www.google-analytics.com https://www.googletagmanager.com",
+          //     "style-src 'self' 'unsafe-inline'",
+          //     "font-src 'self' data:",
+          //     "object-src 'none'",
+          //     "base-uri 'self'",
+          //     "form-action 'self'",
+          //     "frame-ancestors 'none'",
+          //     "upgrade-insecure-requests"
+          //   ].join('; '),
+          // },
         ],
       },
     ]
