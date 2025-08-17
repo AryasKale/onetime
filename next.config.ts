@@ -22,11 +22,9 @@ const nextConfig: NextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react'],
-    optimizeCss: true,
   },
 
-  // Optimize JavaScript for modern browsers
-  swcMinify: true,
+  // Optimize JavaScript for production
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
