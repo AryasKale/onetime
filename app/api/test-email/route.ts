@@ -42,7 +42,8 @@ export async function POST(request: NextRequest) {
     ]
 
     const randomSender = testSenders[Math.floor(Math.random() * testSenders.length)]
-    const randomSubject = testSubjects[Math.floor(Math.random() * testSubjects.length)]
+    const baseSubject = testSubjects[Math.floor(Math.random() * testSubjects.length)]
+    const randomSubject = `Test Email - ${baseSubject}`
     const randomBody = testBodies[Math.floor(Math.random() * testBodies.length)]
 
     // Get the inbox email address
