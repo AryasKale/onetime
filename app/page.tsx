@@ -13,7 +13,7 @@ export default function Home() {
         {/* Hero Section */}
         <header className="mb-12 md:mb-20">
           <div className="text-center mb-8 md:mb-10">
-            <div className="text-4xl md:text-8xl mb-4 md:mb-6" role="img" aria-label="Email icon">📧</div>
+            <div className="text-4xl md:text-8xl mb-4 md:mb-6 h-16 md:h-24 flex items-center justify-center" role="img" aria-label="Email icon">📧</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
               OneTimeEmail - Free Temporary Email Service
             </h1>
@@ -35,19 +35,19 @@ export default function Home() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <article className="ios-safe-card bg-white/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-gray-200 shadow-xl hover:shadow-2xl transition-all hover:scale-105">
-              <div className="text-3xl md:text-5xl mb-4 md:mb-6" role="img" aria-label="User icon">👤</div>
+              <div className="text-3xl md:text-5xl mb-4 md:mb-6 h-12 md:h-16 flex items-center justify-start" role="img" aria-label="User icon">👤</div>
               <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">Smart Identity</h3>
               <p className="text-gray-600 text-base md:text-lg leading-relaxed">Same inbox across all your browser tabs. No confusion, no multiple emails.</p>
             </article>
             
             <article className="ios-safe-card bg-white/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-gray-200 shadow-xl hover:shadow-2xl transition-all hover:scale-105">
-              <div className="text-3xl md:text-5xl mb-4 md:mb-6" role="img" aria-label="Delete icon">🗑️</div>
+              <div className="text-3xl md:text-5xl mb-4 md:mb-6 h-12 md:h-16 flex items-center justify-start" role="img" aria-label="Delete icon">🗑️</div>
               <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">Auto-Delete</h3>
               <p className="text-gray-600 text-base md:text-lg leading-relaxed">Emails automatically expire and delete after 10 minutes, keeping your privacy intact.</p>
             </article>
             
             <article className="ios-safe-card bg-white/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-gray-200 shadow-xl hover:shadow-2xl transition-all hover:scale-105">
-              <div className="text-3xl md:text-5xl mb-4 md:mb-6" role="img" aria-label="Lock icon">🔒</div>
+              <div className="text-3xl md:text-5xl mb-4 md:mb-6 h-12 md:h-16 flex items-center justify-start" role="img" aria-label="Lock icon">🔒</div>
               <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-3 md:mb-4">100% Private</h3>
               <p className="text-gray-600 text-base md:text-lg leading-relaxed">No tracking, no data collection. Your temporary emails are completely anonymous and secure.</p>
             </article>
