@@ -30,6 +30,11 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
         anonymize_ip: true,
         allow_google_signals: false,
         allow_ad_personalization_signals: false,
+        ads_data_redaction: true,
+        cookie_flags: 'max-age=7200;secure;samesite=none',
+        use_amp_client_id: false,
+        restricted_data_processing: true,
+        store_gac: false
       })
 
       // Track custom events
@@ -67,6 +72,11 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
               anonymize_ip: true,
               allow_google_signals: false,
               allow_ad_personalization_signals: false,
+              ads_data_redaction: true,
+              cookie_flags: 'max-age=7200;secure;samesite=none',
+              use_amp_client_id: false,
+              restricted_data_processing: true,
+              store_gac: false
             });
           `,
         }}
