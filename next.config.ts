@@ -22,6 +22,13 @@ const nextConfig: NextConfig = {
   // Experimental features for better performance
   experimental: {
     optimizePackageImports: ['lucide-react'],
+    optimizeCss: true,
+  },
+
+  // Optimize JavaScript for modern browsers
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
   
   // Basic security headers (iOS-compatible)
