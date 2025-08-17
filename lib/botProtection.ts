@@ -16,13 +16,13 @@ interface RateLimitConfig {
   minIntervalSeconds: number;
 }
 
-// Default rate limits - Updated to stricter policy
+// Default rate limits for bot protection
 const DEFAULT_LIMITS: RateLimitConfig = {
-  maxInboxesPerFingerprint: 3,     // Same device/browser
-  maxInboxesPerIP: 3,              // Same IP address
+  maxInboxesPerFingerprint: 50,    // Same device/browser  
+  maxInboxesPerIP: 50,             // Same IP address
   maxInboxesPerUserPerHour: 7,     // Per user per hour
-  maxInboxesPerUserPerDay: 50,     // Per user per day
-  minIntervalSeconds: 60,          // 60 seconds between creations
+  maxInboxesPerUserPerDay: 50,     // Per user per day (higher than hourly)
+  minIntervalSeconds: 30,          // 30 seconds minimum between creations
 };
 
 export class BotProtection {
@@ -43,7 +43,14 @@ export class BotProtection {
     user_agent: string;
   }): Promise<BotDetectionResult> {
     
-    // Check multiple factors
+    // STEP 1: Check if permanently blocked first
+    const permanentBlock = await this.checkPermanentBlocks(trackingData);
+    if (permanentBlock.shouldBlock) {
+      await this.logDetectionEvent(trackingData, permanentBlock);
+      return permanentBlock;
+    }
+
+    // STEP 2: Run real-time detection checks
     const checks = await Promise.all([
       this.checkFingerprintAbuse(trackingData.fingerprint),
       this.checkIPAbuse(trackingData.ip_address),
@@ -88,7 +95,171 @@ export class BotProtection {
       };
     }
 
+    // Log all detection events for analytics
+    this.logDetectionEvent(trackingData, finalResult).catch(console.error);
+    
+    // Auto-block repeat critical offenders
+    if (finalResult.shouldBlock && finalResult.riskLevel === 'critical') {
+      this.autoBlockOffender(trackingData, finalResult).catch(console.error);
+    }
+    
     return finalResult;
+  }
+
+  /**
+   * Log detection event to database for analytics
+   */
+  private async logDetectionEvent(trackingData: {
+    user_id: string;
+    fingerprint: string;
+    ip_address: string;
+    creation_interval: number;
+    user_agent: string;
+  }, result: BotDetectionResult): Promise<void> {
+    try {
+      const { supabase } = await import('./supabaseClient');
+      
+      // Get current counts for analytics
+      const [userCount, fpCount, ipCount] = await Promise.all([
+        this.getEntityCount(supabase, 'user_id', trackingData.user_id),
+        this.getEntityCount(supabase, 'fingerprint', trackingData.fingerprint),
+        this.getEntityCount(supabase, 'ip_address', trackingData.ip_address)
+      ]);
+
+      // Insert detection log
+      await supabase
+        .from('bot_detection_logs')
+        .insert({
+          user_id: trackingData.user_id,
+          fingerprint: trackingData.fingerprint,
+          ip_address: trackingData.ip_address,
+          user_agent: trackingData.user_agent,
+          detection_reason: result.reason,
+          risk_level: result.riskLevel,
+          was_blocked: result.shouldBlock,
+          creation_interval: trackingData.creation_interval,
+          total_user_inboxes: userCount,
+          total_fingerprint_inboxes: fpCount,
+          total_ip_inboxes: ipCount
+        });
+        
+      console.log(`📊 Detection logged: ${result.riskLevel} risk, blocked: ${result.shouldBlock}`);
+      console.log(`   📈 Stats - User: ${userCount}, Fingerprint: ${fpCount}, IP: ${ipCount}`);
+    } catch (error) {
+      console.error('Error logging detection:', error);
+    }
+  }
+
+  /**
+   * Check if entities are permanently blocked
+   */
+  private async checkPermanentBlocks(trackingData: {
+    user_id: string;
+    fingerprint: string;
+    ip_address: string;
+  }): Promise<BotDetectionResult> {
+    try {
+      const { supabase } = await import('./supabaseClient');
+      
+      // Check user, fingerprint, and IP in parallel
+      const [userBlocked, fpBlocked, ipBlocked] = await Promise.all([
+        supabase.rpc('is_entity_blocked', { entity_type_param: 'user_id', entity_value_param: trackingData.user_id }),
+        supabase.rpc('is_entity_blocked', { entity_type_param: 'fingerprint', entity_value_param: trackingData.fingerprint }),
+        supabase.rpc('is_entity_blocked', { entity_type_param: 'ip_address', entity_value_param: trackingData.ip_address })
+      ]);
+
+      if (userBlocked.data) {
+        return {
+          isBot: true,
+          reason: `Permanently blocked user: ${trackingData.user_id}`,
+          riskLevel: 'critical',
+          shouldBlock: true,
+        };
+      }
+
+      if (fpBlocked.data) {
+        return {
+          isBot: true,
+          reason: `Permanently blocked device: ${trackingData.fingerprint}`,
+          riskLevel: 'critical',
+          shouldBlock: true,
+        };
+      }
+
+      if (ipBlocked.data) {
+        return {
+          isBot: true,
+          reason: `Permanently blocked IP: ${trackingData.ip_address}`,
+          riskLevel: 'critical',
+          shouldBlock: true,
+        };
+      }
+    } catch (error) {
+      console.error('Error checking permanent blocks:', error);
+    }
+    
+    return {
+      isBot: false,
+      reason: 'Not permanently blocked',
+      riskLevel: 'low',
+      shouldBlock: false,
+    };
+  }
+
+  /**
+   * Auto-block repeat offenders
+   */
+  private async autoBlockOffender(trackingData: {
+    user_id: string;
+    fingerprint: string;
+    ip_address: string;
+  }, result: BotDetectionResult): Promise<void> {
+    try {
+      const { supabase } = await import('./supabaseClient');
+      
+      // Count recent critical violations for this fingerprint
+      const { data: recentViolations } = await supabase
+        .from('bot_detection_logs')
+        .select('*')
+        .eq('fingerprint', trackingData.fingerprint)
+        .eq('was_blocked', true)
+        .eq('risk_level', 'critical')
+        .gte('detected_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Last 24 hours
+        .order('detected_at', { ascending: false });
+
+      if (recentViolations && recentViolations.length >= 3) {
+        // Auto-block fingerprint after 3 critical violations in 24 hours
+        await supabase.rpc('block_entity', {
+          entity_type_param: 'fingerprint',
+          entity_value_param: trackingData.fingerprint,
+          reason_param: `Auto-blocked: ${recentViolations.length} critical violations in 24h`,
+          risk_level_param: 'critical',
+          blocked_by_param: 'auto-system'
+        });
+        
+        console.log(`🚫 AUTO-BLOCKED fingerprint ${trackingData.fingerprint} after ${recentViolations.length} violations`);
+      }
+    } catch (error) {
+      console.error('Error auto-blocking offender:', error);
+    }
+  }
+
+  /**
+   * Get count of inboxes for a specific entity
+   */
+  private async getEntityCount(supabase: any, column: string, value: string): Promise<number> {
+    try {
+      const { data, error } = await supabase
+        .from('inbox')
+        .select('id', { count: 'exact' })
+        .eq(column, value);
+        
+      if (error) throw error;
+      return data?.length || 0;
+    } catch (error) {
+      console.error(`Error getting ${column} count:`, error);
+      return 0;
+    }
   }
 
   /**
@@ -215,11 +386,13 @@ export class BotProtection {
       
       // Check hourly limit
       const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
-      const { data: hourlyData } = await supabase
+      const { data: hourlyData, error: hourlyError } = await supabase
         .from('inbox')
         .select('id')
         .eq('user_id', userId)
         .gte('created_at', hourAgo.toISOString());
+
+
 
       const hourlyCount = hourlyData?.length || 0;
 
@@ -234,11 +407,13 @@ export class BotProtection {
 
       // Check daily limit
       const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-      const { data: dailyData } = await supabase
+      const { data: dailyData, error: dailyError } = await supabase
         .from('inbox')
         .select('id')
         .eq('user_id', userId)
         .gte('created_at', dayAgo.toISOString());
+
+
 
       const dailyCount = dailyData?.length || 0;
 
@@ -275,14 +450,14 @@ export class BotProtection {
     if (creationInterval > 0 && creationInterval < 5) {
       return {
         isBot: true,
-        reason: `Too fast creation: ${creationInterval}s interval`,
+        reason: `Too fast: ${creationInterval}s interval`,
         riskLevel: 'critical',
         shouldBlock: true,
       };
     } else if (creationInterval > 0 && creationInterval < this.limits.minIntervalSeconds) {
       return {
         isBot: true,
-        reason: `Fast creation: ${creationInterval}s interval (min: ${this.limits.minIntervalSeconds}s)`,
+        reason: `Too fast: ${creationInterval}s interval (min: ${this.limits.minIntervalSeconds}s)`,
         riskLevel: 'high',
         shouldBlock: true,
       };
