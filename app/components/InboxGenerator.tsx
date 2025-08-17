@@ -95,7 +95,8 @@ export default function InboxGenerator() {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to create inbox')
+        const errorData = await response.json()
+        throw new Error(errorData.message || errorData.error || 'Failed to create inbox')
       }
 
       const data: InboxData = await response.json()
