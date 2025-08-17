@@ -78,11 +78,15 @@ export async function POST(request: NextRequest) {
         ip: hashedIP,
       })
 
+      // Single consistent error message for all rate limiting
+      const userMessage = 'You are going too fast, wait for 30 seconds before creating inbox.'
+      const retryAfter = 30
+
       return NextResponse.json(
         { 
           error: 'Rate limit exceeded', 
-          message: 'Too many requests. Please wait before creating another inbox.',
-          retryAfter: 300, // 5 minutes
+          message: userMessage,
+          retryAfter: retryAfter,
         },
         { status: 429 }
       )
@@ -118,7 +122,11 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('Database error:', error)
       return NextResponse.json(
-        { error: 'Failed to create inbox', details: error.message },
+        { 
+          error: 'Service temporarily unavailable', 
+          message: 'We\'re experiencing technical difficulties. Please try again in a few moments.',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+        },
         { status: 500 }
       )
     }
@@ -149,7 +157,11 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('API error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { 
+        error: 'Service temporarily unavailable',
+        message: 'We\'re experiencing technical difficulties. Please try again in a few moments.',
+        details: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : 'Unknown error') : undefined
+      },
       { status: 500 }
     )
   }
