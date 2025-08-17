@@ -57,6 +57,36 @@ export async function POST(request: NextRequest) {
     const referer = request.headers.get('referer') || 'direct'
     const clientIP = getClientIP(request)
     const hashedIP = hashIP(clientIP)
+
+    // 🛡️ BOT PROTECTION CHECK
+    const { botProtection } = await import('@/lib/botProtection')
+    
+    const botCheck = await botProtection.checkUserSafety({
+      user_id: userId,
+      fingerprint: fingerprint,
+      ip_address: hashedIP,
+      creation_interval: creationInterval,
+      user_agent: userAgent,
+    })
+
+    if (botCheck.shouldBlock) {
+      console.warn('Bot detected and blocked:', {
+        userId,
+        fingerprint,
+        reason: botCheck.reason,
+        riskLevel: botCheck.riskLevel,
+        ip: hashedIP,
+      })
+
+      return NextResponse.json(
+        { 
+          error: 'Rate limit exceeded', 
+          message: 'Too many requests. Please wait before creating another inbox.',
+          retryAfter: 300, // 5 minutes
+        },
+        { status: 429 }
+      )
+    }
     
     // Generate a temporary email address
     const emailAddress = generateRandomEmail()
