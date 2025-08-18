@@ -21,6 +21,14 @@ export default function GoogleAdSense({ publisherId = 'ca-pub-5173629853652958' 
 
   return (
     <>
+      {/* Standard AdSense Script for verification and ad serving */}
+      <Script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${publisherId}`}
+        crossOrigin="anonymous"
+        strategy="afterInteractive"
+      />
+      
       {/* AMP Auto Ads Script - loads the amp-auto-ads library */}
       <Script
         src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"
