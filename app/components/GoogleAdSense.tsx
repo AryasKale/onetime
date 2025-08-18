@@ -23,16 +23,16 @@ export default function GoogleAdSense({ publisherId = 'ca-pub-5173629853652958' 
     <>
       {/* AMP Auto Ads Script - loads the amp-auto-ads library */}
       <Script
-        async
-        custom-element="amp-auto-ads"
         src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"
         strategy="afterInteractive"
+        async
       />
       
-      {/* AMP Auto Ads Component - placed after body tag */}
-      <amp-auto-ads
-        type="adsense"
-        data-ad-client={publisherId}
+      {/* AMP Auto Ads Component - using dangerouslySetInnerHTML for custom elements */}
+      <div
+        dangerouslySetInnerHTML={{
+          __html: `<amp-auto-ads type="adsense" data-ad-client="${publisherId}"></amp-auto-ads>`
+        }}
       />
     </>
   )
