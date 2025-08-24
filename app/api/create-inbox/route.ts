@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
     const sessionId = body.session_id || 'unknown_session'
     const fingerprint = body.fingerprint || 'unknown_fingerprint'
     const browserInfo = body.browser_info || {}
-    const creationInterval = body.creation_interval || 0
+    // const creationInterval = body.creation_interval || 0 // REMOVED - no longer needed
     
     // Get server-side data
     const userAgent = request.headers.get('user-agent') || 'unknown'
@@ -58,39 +58,7 @@ export async function POST(request: NextRequest) {
     const clientIP = getClientIP(request)
     const hashedIP = hashIP(clientIP)
 
-    // 🛡️ LIGHTWEIGHT BOT PROTECTION CHECK (fast, no database queries)
-    const { botProtectionLightweight } = await import('@/lib/botProtection-lightweight')
-    
-    const botCheck = await botProtectionLightweight.checkUserSafety({
-      user_id: userId,
-      fingerprint: fingerprint,
-      ip_address: hashedIP,
-      creation_interval: creationInterval,
-      user_agent: userAgent,
-    })
-
-    if (botCheck.shouldBlock) {
-      console.warn('Bot detected and blocked:', {
-        userId,
-        fingerprint,
-        reason: botCheck.reason,
-        riskLevel: botCheck.riskLevel,
-        ip: hashedIP,
-      })
-
-      // Single consistent error message for all rate limiting
-      const userMessage = 'You are going too fast, wait for 30 seconds before creating inbox.'
-      const retryAfter = 30
-
-      return NextResponse.json(
-        { 
-          error: 'Rate limit exceeded', 
-          message: userMessage,
-          retryAfter: retryAfter,
-        },
-        { status: 429 }
-      )
-    }
+    // 🚀 BOT PROTECTION REMOVED - No rate limiting checks
     
     // Generate a temporary email address
     const emailAddress = generateRandomEmail()
@@ -113,7 +81,6 @@ export async function POST(request: NextRequest) {
         fingerprint: fingerprint,
         referer: referer,
         session_id: sessionId,
-        creation_interval: creationInterval,
         browser_info: browserInfo
       }])
       .select()
