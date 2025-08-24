@@ -3,7 +3,8 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import GoogleAdSense from "./components/GoogleAdSense";
-import StructuredData from "./components/StructuredData";
+import ClientStructuredData from "./components/ClientStructuredData";
+
 
 // Simplified, iOS-safe metadata
 export const metadata: Metadata = {
@@ -69,12 +70,12 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         
-        {/* Structured Data for SEO */}
-        <StructuredData />
+
       </head>
       <body className="min-h-screen bg-white flex flex-col font-sans antialiased">
         <GoogleAnalytics GA_MEASUREMENT_ID="G-DCD15YJ0R5" />
         <GoogleAdSense publisherId="ca-pub-5173629853652958" />
+        <ClientStructuredData />
         <main className="flex-grow">
         {children}
         </main>
