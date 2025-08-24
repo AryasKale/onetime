@@ -58,10 +58,10 @@ export async function POST(request: NextRequest) {
     const clientIP = getClientIP(request)
     const hashedIP = hashIP(clientIP)
 
-    // 🛡️ BOT PROTECTION CHECK
-    const { botProtection } = await import('@/lib/botProtection')
+    // 🛡️ LIGHTWEIGHT BOT PROTECTION CHECK (fast, no database queries)
+    const { botProtectionLightweight } = await import('@/lib/botProtection-lightweight')
     
-    const botCheck = await botProtection.checkUserSafety({
+    const botCheck = await botProtectionLightweight.checkUserSafety({
       user_id: userId,
       fingerprint: fingerprint,
       ip_address: hashedIP,

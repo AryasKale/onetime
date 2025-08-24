@@ -41,6 +41,10 @@ export default function InboxGenerator() {
   const [expandedEmails, setExpandedEmails] = useState<Set<string>>(new Set())
   const [testEmailCount, setTestEmailCount] = useState(0)
   const [sendingTestEmail, setSendingTestEmail] = useState(false)
+  
+  // 🚀 PERFORMANCE: Lazy loading states
+  const [emailsLoaded, setEmailsLoaded] = useState(false)
+  const [realtimeEnabled, setRealtimeEnabled] = useState(false)
 
   // Toggle email expansion
   const toggleEmailExpansion = (emailId: string, event: React.MouseEvent) => {
@@ -121,7 +125,10 @@ export default function InboxGenerator() {
       
       setCurrentInbox(inboxData)
       calculateTimeRemaining(data.expires_at)
-      loadEmails(data.id)
+      // 🚀 PERFORMANCE: Don't load emails immediately for new inbox (it's empty anyway)
+      setEmails([])
+      setEmailsLoaded(false)
+      setRealtimeEnabled(false)
       
       // Update last creation time for rate limiting
       setLastInboxCreation()
@@ -136,8 +143,10 @@ export default function InboxGenerator() {
     }
   }
 
-  // Load emails for the current inbox
+  // 🚀 PERFORMANCE: Load emails for the current inbox (lazy loading)
   const loadEmails = async (inboxId: string) => {
+    if (emailsLoaded) return // Don't reload if already loaded
+    
     try {
       const { data, error } = await supabase
         .from('emails')
@@ -149,6 +158,7 @@ export default function InboxGenerator() {
         console.error('Error loading emails:', error)
       } else {
         setEmails(data || [])
+        setEmailsLoaded(true)
       }
     } catch (err) {
       console.error('Error loading emails:', err)
@@ -190,6 +200,8 @@ export default function InboxGenerator() {
     }
     setCurrentInbox(null)
     setEmails([])
+    setEmailsLoaded(false) // 🚀 PERFORMANCE: Reset lazy loading state
+    setRealtimeEnabled(false) // 🚀 PERFORMANCE: Reset realtime state
     setTimeRemaining(0)
   }
 
@@ -243,7 +255,8 @@ export default function InboxGenerator() {
           if (expiresAt > now) {
             setCurrentInbox(inbox)
             calculateTimeRemaining(inbox.expires_at)
-            loadEmails(inbox.id)
+            // 🚀 PERFORMANCE: Don't load emails immediately - wait for user interaction
+            setEmailsLoaded(false)
           } else {
             // Clean up expired inbox
             localStorage.removeItem('currentInbox')
@@ -272,7 +285,9 @@ export default function InboxGenerator() {
           const inbox = JSON.parse(e.newValue)
           setCurrentInbox(inbox)
           calculateTimeRemaining(inbox.expires_at)
-          loadEmails(inbox.id)
+          // 🚀 PERFORMANCE: Reset email loading state for cross-tab changes
+          setEmailsLoaded(false)
+          setRealtimeEnabled(false)
         } catch (error) {
           console.error('Error parsing inbox from storage event:', error)
         }
@@ -300,35 +315,55 @@ export default function InboxGenerator() {
     }
   }, [currentInbox, timeRemaining])
 
-  // Real-time email updates
+  // 🚀 PERFORMANCE: Real-time email updates (lazy loading)
   useEffect(() => {
-    if (currentInbox?.id) {
-      const subscription = supabase
-        .channel(`emails-${currentInbox.id}`)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'emails',
-            filter: `inbox_id=eq.${currentInbox.id}`
-          },
-          (payload) => {
-            const newEmail = payload.new as EmailData
-            setEmails(prev => {
-              const exists = prev.find(e => e.id === newEmail.id)
-              if (exists) return prev
-              return [newEmail, ...prev]
-            })
-          }
-        )
-        .subscribe()
+    if (currentInbox?.id && emailsLoaded && !realtimeEnabled) {
+      // Small delay to let UI render first
+      const timer = setTimeout(() => {
+        const subscription = supabase
+          .channel(`emails-${currentInbox.id}`)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'emails',
+              filter: `inbox_id=eq.${currentInbox.id}`
+            },
+            (payload) => {
+              const newEmail = payload.new as EmailData
+              setEmails(prev => {
+                const exists = prev.find(e => e.id === newEmail.id)
+                if (exists) return prev
+                return [newEmail, ...prev]
+              })
+            }
+          )
+          .subscribe()
 
-      return () => {
-        subscription.unsubscribe()
-      }
+        setRealtimeEnabled(true)
+
+        return () => {
+          subscription.unsubscribe()
+          setRealtimeEnabled(false)
+        }
+      }, 200)
+
+      return () => clearTimeout(timer)
     }
-  }, [currentInbox?.id])
+  }, [currentInbox?.id, emailsLoaded, realtimeEnabled])
+
+  // 🚀 PERFORMANCE: Load emails and enable real-time only when inbox is displayed
+  useEffect(() => {
+    if (currentInbox?.id && isInitialized && !emailsLoaded) {
+      // Small delay to let the UI render first
+      const timer = setTimeout(() => {
+        loadEmails(currentInbox.id)
+      }, 100)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [currentInbox?.id, isInitialized, emailsLoaded])
 
   // Check how many test emails were already sent for this inbox
   useEffect(() => {
@@ -490,7 +525,13 @@ export default function InboxGenerator() {
             </div>
           )}
 
-          {emails.length === 0 ? (
+          {!emailsLoaded ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading emails...</p>
+              <p className="text-gray-500 text-sm mt-2">This will only take a moment</p>
+            </div>
+          ) : emails.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📭</div>
               <div className="text-xl text-gray-700 mb-2">No emails yet</div>
