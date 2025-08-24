@@ -22,32 +22,51 @@ export function generateFingerprint(): string {
   }
 
   try {
-    const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')
-    ctx!.textBaseline = 'top'
-    ctx!.font = '14px Arial'
-    ctx!.fillText('Browser fingerprint', 2, 2)
-    
-    const fingerprint = [
-      navigator.userAgent,
-      navigator.language,
+    // Base fingerprint without canvas (stable across page loads)
+    const baseFingerprint = [
+      navigator.userAgent || 'unknown',
+      navigator.language || 'unknown',
       screen.width + 'x' + screen.height,
-      screen.colorDepth,
+      screen.colorDepth || 'unknown',
       new Date().getTimezoneOffset(),
-      canvas.toDataURL()
+      navigator.platform || 'unknown'
     ].join('|')
+    
+    // Try canvas fingerprinting (optional, might fail on Samsung/privacy browsers)
+    let canvasFingerprint = ''
+    try {
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      // Check if canvas context is available (Samsung browsers might block this)
+      if (ctx) {
+        ctx.textBaseline = 'top'
+        ctx.font = '14px Arial'
+        ctx.fillText('Browser fingerprint', 2, 2)
+        canvasFingerprint = canvas.toDataURL()
+      } else {
+        // Samsung/privacy browsers - use stable fallback
+        canvasFingerprint = 'canvas_blocked_privacy_browser'
+      }
+    } catch (canvasError) {
+      // Canvas blocked or failed - use stable fallback
+      canvasFingerprint = 'canvas_error_privacy_browser'
+    }
+    
+    const fullFingerprint = baseFingerprint + '|' + canvasFingerprint
     
     // Create a simple hash of the fingerprint
     let hash = 0
-    for (let i = 0; i < fingerprint.length; i++) {
-      const char = fingerprint.charCodeAt(i)
+    for (let i = 0; i < fullFingerprint.length; i++) {
+      const char = fullFingerprint.charCodeAt(i)
       hash = ((hash << 5) - hash) + char
       hash = hash & hash // Convert to 32-bit integer
     }
     
     return `fp_${Math.abs(hash).toString(36)}`
   } catch (error) {
-    return `fp_fallback_${Date.now().toString(36)}`
+    // Final fallback - stable across same browser/device but not timestamp-based
+    return `fp_stable_${navigator.userAgent?.slice(0, 20).replace(/[^a-zA-Z0-9]/g, '') || 'unknown'}`
   }
 }
 
