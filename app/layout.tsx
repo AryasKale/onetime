@@ -3,21 +3,23 @@ import "./globals.css";
 import Footer from "./components/Footer";
 import GoogleAnalytics from "./components/GoogleAnalytics";
 import GoogleAdSense from "./components/GoogleAdSense";
+import StructuredData from "./components/StructuredData";
 
 // Simplified, iOS-safe metadata
 export const metadata: Metadata = {
-  title: 'OneTimeEmail - Temporary Email Service',
-  description: 'Generate temporary email addresses instantly. Secure, private, and free disposable email service.',
-  keywords: ['temporary email', 'disposable email', 'fake email', 'email generator'],
+  title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Email Addresses',
+  description: 'Free email generator for temporary and disposable email addresses. Create fake email addresses instantly for verification, privacy protection, and spam prevention. No registration required.',
+  keywords: ['email generator', 'temporary email', 'disposable email', 'fake email generator', 'temp mail', 'throwaway email', 'anonymous email', '10 minute email', 'temporary email address', 'disposable email service'],
   robots: {
     index: true,
     follow: true,
   },
   openGraph: {
-    title: 'OneTimeEmail - Temporary Email Service',
-    description: 'Generate temporary email addresses instantly. Secure, private, and free.',
+    title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Email Addresses',
+    description: 'Free email generator for temporary and disposable email addresses. Create fake email addresses instantly for verification, privacy protection, and spam prevention.',
     url: 'https://onetimeemail.net',
     type: 'website',
+    siteName: 'OneTimeEmail',
   },
 };
 
@@ -66,6 +68,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://cdn.ampproject.org" />
         <link rel="dns-prefetch" href="https://googleads.g.doubleclick.net" />
         <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
+        
+        {/* Structured Data for SEO */}
+        <StructuredData />
       </head>
       <body className="min-h-screen bg-white flex flex-col font-sans antialiased">
         <GoogleAnalytics GA_MEASUREMENT_ID="G-DCD15YJ0R5" />

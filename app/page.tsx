@@ -2,8 +2,8 @@ import { Metadata } from 'next'
 import InboxGeneratorWrapper from './components/InboxGeneratorWrapper'
 
 export const metadata: Metadata = {
-  title: 'OneTimeEmail - Free Temporary Email Service',
-  description: 'Generate temporary email addresses instantly. Secure, private, and free disposable email service.',
+  title: 'Free Email Generator - OneTimeEmail | Create Temporary & Disposable Emails Instantly',
+  description: 'Best free email generator for creating temporary and disposable email addresses. Generate fake emails instantly for verification, privacy protection, and spam prevention. No registration required!',
 }
 
 export default function Home() {
@@ -15,10 +15,10 @@ export default function Home() {
           <div className="text-center mb-8 md:mb-10">
             <div className="text-4xl md:text-8xl mb-4 md:mb-6 h-16 md:h-24 flex items-center justify-center" role="img" aria-label="Email icon">📧</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
-              OneTimeEmail - Free Temporary Email Service
+              Free Email Generator - OneTimeEmail
             </h1>
             <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 md:mb-8 px-4">
-              Generate secure temporary email addresses that self-destruct automatically
+              Create temporary & disposable email addresses instantly. Perfect for verification, privacy protection, and spam prevention.
             </p>
           </div>
 
