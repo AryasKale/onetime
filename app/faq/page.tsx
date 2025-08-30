@@ -301,6 +301,22 @@ export default function FAQPage() {
                     <h3 className="font-semibold text-gray-900 mb-1">Privacy Pitfalls</h3>
                     <p className="text-sm text-gray-600">Avoid common mistakes</p>
                   </Link>
+                  <Link 
+                    href="/developers"
+                    className="bg-yellow-50 hover:bg-yellow-100 p-4 rounded-lg transition-colors"
+                  >
+                    <div className="text-2xl mb-2">🧑‍💻</div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Developers Guide</h3>
+                    <p className="text-sm text-gray-600">Automate QA flows</p>
+                  </Link>
+                  <Link 
+                    href="/articles/use-cases"
+                    className="bg-teal-50 hover:bg-teal-100 p-4 rounded-lg transition-colors"
+                  >
+                    <div className="text-2xl mb-2">🧭</div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Deep Use Cases</h3>
+                    <p className="text-sm text-gray-600">Practical workflows</p>
+                  </Link>
                 </div>
               </div>
             </section>
