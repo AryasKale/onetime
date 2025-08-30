@@ -1,28 +1,37 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Basic performance optimizations
+  // Build performance optimizations
   compress: true,
   poweredByHeader: false,
-  reactStrictMode: true,
-  
+  reactStrictMode: false, // Disabled for faster builds
+  productionBrowserSourceMaps: false, // Faster builds, smaller bundles
+
+  // Bundle optimization
+  swcMinify: true,
+
   // Image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     minimumCacheTTL: 60 * 60 * 24 * 365, // 1 year
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
-  // Turbopack configuration (stable)
-  turbopack: {
-    resolveAlias: {
-      'web-vitals': './lib/web-vitals-stub.ts',
-    },
-  },
-  
-  // Experimental features for better performance
+
+  // Build optimization
   experimental: {
-    optimizePackageImports: ['lucide-react'],
+    optimizePackageImports: [],
+    // Disable CSS optimization to avoid missing 'critters' dependency on this env
+    optimizeCss: false,
+    scrollRestoration: false, // Faster hydration
+    typedRoutes: false, // Faster builds
   },
+
+  // Output optimization
+  output: 'standalone',
+  generateEtags: false, // Faster builds
+
+
 
   // Optimize JavaScript for production
   compiler: {

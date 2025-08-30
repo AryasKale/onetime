@@ -160,7 +160,7 @@ export default function FAQPage() {
     },
     {
       question: "What makes OneTimeEmail different from other temporary email services?",
-      answer: "OneTimeEmail focuses on privacy, security, and simplicity. We offer transparent privacy practices, comprehensive security measures, no tracking or data collection, automatic HTTPS encryption, reliable email delivery, and a clean, user-friendly interface. Our commitment to keeping the service completely free also sets us apart."
+      answer: "OneTimeEmail focuses on privacy, security, and simplicity. We offer transparent privacy practices, comprehensive security measures, automatic HTTPS encryption, reliable email delivery, and a clean, user-friendly interface. Analytics and ads are configured in a privacy-safe way using Consent Mode v2 and non-personalized ad settings. Our commitment to keeping the core service free also sets us apart."
     },
     {
       question: "Can I use OneTimeEmail for business purposes?",
@@ -284,6 +284,22 @@ export default function FAQPage() {
                     <div className="text-2xl mb-2">📋</div>
                     <h3 className="font-semibold text-gray-900 mb-1">Terms</h3>
                     <p className="text-sm text-gray-600">Service terms</p>
+                  </Link>
+                  <Link 
+                    href="/articles/qa-testing"
+                    className="bg-indigo-50 hover:bg-indigo-100 p-4 rounded-lg transition-colors"
+                  >
+                    <div className="text-2xl mb-2">🧪</div>
+                    <h3 className="font-semibold text-gray-900 mb-1">QA Testing Guide</h3>
+                    <p className="text-sm text-gray-600">Use temp emails in QA</p>
+                  </Link>
+                  <Link 
+                    href="/articles/privacy-pitfalls"
+                    className="bg-pink-50 hover:bg-pink-100 p-4 rounded-lg transition-colors"
+                  >
+                    <div className="text-2xl mb-2">🔒</div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Privacy Pitfalls</h3>
+                    <p className="text-sm text-gray-600">Avoid common mistakes</p>
                   </Link>
                 </div>
               </div>

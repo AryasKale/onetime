@@ -7,7 +7,11 @@ export default function Footer() {
     { href: '/', label: 'Home', title: 'Generate temporary email addresses' },
     { href: '/about', label: 'About', title: 'Learn about OneTimeEmail mission and values' },
     { href: '/how-it-works', label: 'How It Works', title: 'Step-by-step guide to using temporary emails' },
+    { href: '/guide', label: 'Complete Guide', title: 'Master temporary email services and privacy protection' },
+    { href: '/privacy-guide', label: 'Privacy Guide', title: 'Complete guide to email privacy and security' },
+    { href: '/security', label: 'Security', title: 'Learn about our advanced security features and encryption' },
     { href: '/faq', label: 'FAQ', title: 'Frequently asked questions about temporary emails' },
+    { href: '/contact', label: 'Contact', title: 'Get in touch with OneTimeEmail support team' },
     { href: '/privacy', label: 'Privacy Policy', title: 'Our privacy policy and data protection practices' },
     { href: '/terms', label: 'Terms of Service', title: 'Terms and conditions for using OneTimeEmail' }
   ]
@@ -27,7 +31,7 @@ export default function Footer() {
               OneTimeEmail
             </Link>
             <p className="text-sm text-gray-600 mt-2 max-w-md">
-              Free temporary email service for privacy protection and spam prevention
+              Anonymous email generator with 10-minute auto-deletion for ultimate online privacy
             </p>
           </div>
 

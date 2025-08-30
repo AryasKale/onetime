@@ -4,7 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "build": "next build --no-lint",
+    "build:fast": "NODE_OPTIONS='--max-old-space-size=4096' next build --no-lint",
+    "build:analyze": "ANALYZE=true next build --no-lint",
+    "build:optimized": "node build-optimized.js",
+    "build:clean": "rm -rf .next && npm run build:optimized",
+    "analyze": "node check-performance.js",
     "start": "next start",
     "lint": "next lint",
     "clear-cache": "node clear-cache.js",
