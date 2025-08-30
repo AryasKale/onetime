@@ -1,45 +1,44 @@
 'use client'
 
-import Script from 'next/script'
 import { useEffect, useState } from 'react'
 
 interface GoogleAdSenseProps {
-  publisherId?: string
+  adSlotId?: string
 }
 
-export default function GoogleAdSense({ publisherId = 'ca-pub-5173629853652958' }: GoogleAdSenseProps) {
+// Non-AMP AdSense: renders a responsive ad unit after consent
+export default function GoogleAdSense({ adSlotId }: GoogleAdSenseProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Don't render in development or before mounting
-  if (process.env.NODE_ENV !== 'production' || !mounted) {
-    return null
-  }
+  useEffect(() => {
+    if (!mounted || process.env.NODE_ENV !== 'production') return
+    if (typeof window === 'undefined') return
+    if (!(window as any).adsbygoogle) {
+      ;(window as any).adsbygoogle = []
+    }
+    try {
+      ;(window as any).adsbygoogle.push({})
+    } catch (e) {
+      // ignore
+    }
+  }, [mounted])
+
+  if (process.env.NODE_ENV !== 'production' || !mounted) return null
 
   return (
-    <>
-      {/* AMP Auto Ads Component - script is loaded in head, this goes in body */}
-      <div
-        dangerouslySetInnerHTML={{
-          __html: `<amp-auto-ads type="adsense" data-ad-client="${publisherId}"></amp-auto-ads>`
-        }}
-      />
-    </>
+    <ins
+      className="adsbygoogle"
+      style={{ display: 'block' }}
+      data-ad-client="ca-pub-5173629853652958"
+      data-ad-slot={adSlotId || ''}
+      data-ad-format="auto"
+      data-full-width-responsive="true"
+    />
   )
-}
-
-// Helper function to manually trigger ad refresh if needed
-export const refreshAds = () => {
-  if (typeof window !== 'undefined' && window.adsbygoogle) {
-    try {
-      window.adsbygoogle.push({})
-    } catch (error) {
-      console.warn('AdSense refresh failed:', error)
-    }
-  }
 }
 
 // Declare global adsbygoogle for TypeScript

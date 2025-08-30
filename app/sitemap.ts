@@ -1,42 +1,80 @@
 import { MetadataRoute } from 'next'
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const baseUrl = 'https://onetimeemail.net'
+
   return [
     {
-      url: 'https://onetimeemail.net',
+      url: baseUrl,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
     },
     {
-      url: 'https://onetimeemail.net/about',
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
-      url: 'https://onetimeemail.net/privacy',
+      url: `${baseUrl}/guide`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/privacy-guide`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/security`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/how-it-works`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/faq`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: 'https://onetimeemail.net/terms',
+      url: `${baseUrl}/privacy`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
-      url: 'https://onetimeemail.net/how-it-works',
+      url: `${baseUrl}/terms`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.7,
+      priority: 0.6,
     },
     {
-      url: 'https://onetimeemail.net/faq',
+      url: `${baseUrl}/articles/qa-testing`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.7,
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/articles/privacy-pitfalls`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
     },
   ]
-} 
+}

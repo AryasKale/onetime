@@ -23,7 +23,7 @@ export default function PrivacyPage() {
             ensure your temporary email usage remains completely anonymous.
           </p>
           <div className="mt-6 text-sm text-gray-500">
-            Last updated: January 2024
+            Last updated: August 2025
           </div>
         </header>
 
@@ -33,7 +33,8 @@ export default function PrivacyPage() {
               <h2 className="text-2xl font-bold text-green-800 mb-4">Privacy at a Glance</h2>
               <ul className="space-y-2 text-green-700">
                 <li>✅ <strong>No personal data collection</strong> - We don't ask for or store personal information</li>
-                <li>✅ <strong>No tracking</strong> - We don't use cookies, analytics, or tracking pixels</li>
+                <li>✅ <strong>Privacy-safe analytics</strong> - Google Analytics with IP anonymization and Consent Mode v2</li>
+                <li>✅ <strong>Non-personalized ads</strong> - AdSense respects your consent choices (EEA/UK)</li>
                 <li>✅ <strong>No data sales</strong> - We never sell, share, or monetize user data</li>
                 <li>✅ <strong>Auto-deletion</strong> - All emails are automatically deleted after expiration</li>
                 <li>✅ <strong>Open source approach</strong> - Transparent about our practices</li>
@@ -342,6 +343,34 @@ export default function PrivacyPage() {
                     Material changes will be posted prominently on our website.
                   </p>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-6">Advertising, Analytics & Cookies</h2>
+            <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-8 border border-gray-200 shadow-xl">
+              <div className="space-y-6 text-gray-700">
+                <p>
+                  We show privacy-safe ads using Google AdSense and measure basic site usage with Google Analytics. We do not collect or sell personal data. IPs are anonymized and ad personalization signals are disabled.
+                </p>
+                <ul className="list-disc pl-6 space-y-2">
+                  <li>
+                    <strong>AdSense:</strong> Ads are served by Google. Google may use cookies or local storage to prevent fraud and cap frequency. We do not enable personalized ads. Do not click your own ads or encourage others to do so.
+                  </li>
+                  <li>
+                    <strong>Analytics:</strong> We use Google Analytics just to understand page views and basic engagement. We enable IP anonymization and restricted data processing.
+                  </li>
+                  <li>
+                    <strong>Cookies & storage:</strong> Any cookies set by Google are controlled by Google and subject to their policies. We do not set tracking cookies ourselves.
+                  </li>
+                </ul>
+                <p>
+                  If you are in the EEA/UK, we use a Google-certified Consent Management Platform (CMP) and implement Google Consent Mode v2. Your choices are respected and propagated to Google tags. You can change your consent at any time via the consent banner or the footer link.
+                </p>
+                <p className="text-sm text-gray-500">
+                  For more details, see Google Publisher Policies and AdSense Program Policies.
+                </p>
               </div>
             </div>
           </section>
