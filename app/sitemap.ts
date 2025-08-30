@@ -65,6 +65,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.6,
     },
     {
+      url: `${baseUrl}/developers`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.6,
+    },
+    {
       url: `${baseUrl}/articles/qa-testing`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
@@ -72,6 +78,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/articles/privacy-pitfalls`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/articles/use-cases`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.5,

@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Email Addresses',
   description: 'Free email generator for temporary and disposable email addresses. Create fake email addresses instantly for verification, privacy protection, and spam prevention. No registration required.',
   keywords: ['email generator', 'temporary email', 'disposable email', 'fake email generator', 'temp mail', 'throwaway email', 'anonymous email', '10 minute email', 'temporary email address', 'disposable email service'],
+  metadataBase: new URL('https://onetimeemail.net'),
   robots: {
     index: true,
     follow: true,
