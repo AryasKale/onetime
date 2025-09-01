@@ -15,8 +15,8 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
   }, [])
 
   useEffect(() => {
-    // Only load in production and after mounting
-    if (process.env.NODE_ENV !== 'production' || !mounted) {
+    // Only load after mounting (works in any environment)
+    if (!mounted) {
       return
     }
 
@@ -34,7 +34,8 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
         cookie_flags: 'max-age=7200;secure;samesite=none',
         use_amp_client_id: false,
         restricted_data_processing: true,
-        store_gac: false
+        store_gac: false,
+        debug_mode: process.env.NODE_ENV === 'development' // Enable debug in development
       })
 
       // Track custom events
@@ -46,8 +47,8 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
     }
   }, [GA_MEASUREMENT_ID, mounted])
 
-  // Don't render in development or before mounting
-  if (process.env.NODE_ENV !== 'production' || !mounted) {
+  // Don't render before mounting
+  if (!mounted) {
     return null
   }
 
@@ -76,7 +77,8 @@ export default function GoogleAnalytics({ GA_MEASUREMENT_ID = 'G-DCD15YJ0R5' }: 
               cookie_flags: 'max-age=7200;secure;samesite=none',
               use_amp_client_id: false,
               restricted_data_processing: true,
-              store_gac: false
+              store_gac: false,
+              debug_mode: ${process.env.NODE_ENV === 'development'}
             });
           `,
         }}
