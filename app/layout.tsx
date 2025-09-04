@@ -52,7 +52,7 @@ export default function RootLayout({
            function gtag(){dataLayer.push(arguments);}
            gtag('consent', 'default', {
              ad_storage: 'denied',
-             analytics_storage: 'denied',
+             analytics_storage: 'granted',
              ad_user_data: 'denied',
              ad_personalization: 'denied',
              functionality_storage: 'granted',
