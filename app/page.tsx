@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import Link from 'next/link'
 import InboxGeneratorWrapper from './components/InboxGeneratorWrapper'
 import StructuredData, { ServiceStructuredData } from './components/StructuredData'
 import { StatCard, BenefitCard, ProcessStep } from './components/VisualElements'
@@ -60,6 +61,18 @@ export default function Home() {
         {/* Hero Section */}
         <header className="mb-12 md:mb-20">
           <div className="text-center mb-8 md:mb-10">
+            {/* Top Navigation */}
+            <nav className="mb-6">
+              <Link 
+                href="/blog"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm transition-colors"
+              >
+                <span>📚</span>
+                Privacy Blog
+                <span className="text-xs opacity-75">→</span>
+              </Link>
+            </nav>
+            
             <div className="text-4xl md:text-8xl mb-4 md:mb-6 h-16 md:h-24 flex items-center justify-center" role="img" aria-label="Email icon">📧</div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
               Free Email Generator - OneTimeEmail

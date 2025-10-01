@@ -5,6 +5,7 @@ export default function Footer() {
   
   const footerLinks = [
     { href: '/', label: 'Home', title: 'Generate temporary email addresses' },
+    { href: '/blog', label: 'Blog', title: 'Expert insights on email privacy and security' },
     { href: '/about', label: 'About', title: 'Learn about OneTimeEmail mission and values' },
     { href: '/how-it-works', label: 'How It Works', title: 'Step-by-step guide to using temporary emails' },
     { href: '/guide', label: 'Complete Guide', title: 'Master temporary email services and privacy protection' },

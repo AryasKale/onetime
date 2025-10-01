@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  themeColor: '#ffffff',
+  themeColor: '#3B82F6',
 };
 
 export default function RootLayout({
@@ -92,7 +92,10 @@ export default function RootLayout({
 
         {/* Performance hints */}
         <link rel="preload" href="/favicon.ico" as="image" />
-        <meta name="theme-color" content="#ffffff" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+        <meta name="theme-color" content="#3B82F6" />
 
         {/* Security headers */}
         <meta httpEquiv="X-Content-Type-Options" content="nosniff" />

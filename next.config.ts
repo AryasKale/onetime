@@ -7,8 +7,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false, // Disabled for faster builds
   productionBrowserSourceMaps: false, // Faster builds, smaller bundles
 
-  // Bundle optimization
-  swcMinify: true,
+  // Bundle optimization (swcMinify is now default and deprecated)
 
   // Image optimization
   images: {
