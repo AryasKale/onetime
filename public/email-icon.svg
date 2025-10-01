@@ -1,0 +1,14 @@
+<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Email envelope with modern design -->
+  <rect x="2" y="8" width="28" height="20" rx="3" ry="3" fill="#3B82F6" stroke="#1E40AF" stroke-width="1"/>
+  
+  <!-- Email flap/top -->
+  <path d="M2 11 L16 19 L30 11" stroke="#1E40AF" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Temporary/time indicator - small clock icon -->
+  <circle cx="24" cy="12" r="4" fill="#EF4444" stroke="#FFFFFF" stroke-width="1"/>
+  <path d="M22 10 L24 12 L26 10" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Privacy shield -->
+  <path d="M8 6 C8 4, 10 4, 12 6 C12 8, 10 10, 8 8 Z" fill="#10B981" stroke="#059669" stroke-width="0.5"/>
+</svg>
