@@ -71,7 +71,7 @@ export default function RootLayout({
         <link rel="canonical" href="https://onetimeemail.net/" />
         
         {/* Google Site Verification */}
-        <meta name="google-site-verification" content="9fc7f0d25bdf3e4c" />
+        <meta name="google-site-verification" content="9YY_9vo4jDR0SRq0NSR-uf0mfburPgWcoBimwD5vggY" />
         
         {/* Minimal, iOS-safe meta tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
