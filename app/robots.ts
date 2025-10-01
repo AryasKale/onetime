@@ -25,6 +25,5 @@ export default function robots(): MetadataRoute.Robots {
       },
     ],
     sitemap: 'https://onetimeemail.net/sitemap.xml',
-    host: 'https://onetimeemail.net',
   }
 } 
