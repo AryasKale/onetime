@@ -167,6 +167,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.6,
     },
+    {
+      url: `${baseUrl}/blog/category/online-shopping-and-security`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/blog/category/personal-safety`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/blog/category/sustainability`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.5,
+    },
     // Blog Tags
     {
       url: `${baseUrl}/blog/tag/privacy`,
