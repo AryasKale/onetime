@@ -64,20 +64,39 @@ export default function Home() {
         {/* Hero Section */}
         <header className="mb-12 md:mb-20">
           <div className="text-center mb-8 md:mb-10">
-            {/* Top Navigation */}
-            <nav className="mb-8">
-              <Link 
-                href="/blog"
-                className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
-              >
-                <span className="text-lg">📚</span>
-                <span>Read Our Privacy Blog</span>
-                <span className="text-sm opacity-75">→</span>
-              </Link>
-              <p className="text-sm text-gray-600 mt-3 text-center">Expert insights on email privacy and security</p>
-            </nav>
-            
-            <div className="text-4xl md:text-8xl mb-4 md:mb-6 h-16 md:h-24 flex items-center justify-center" role="img" aria-label="Email icon">📧</div>
+            {/* Main Header Content with Small Blog Button */}
+            <div className="relative mb-8">
+              {/* Blog Button - Top Right */}
+              <div className="absolute top-0 right-0 hidden md:block">
+                <Link 
+                  href="/blog"
+                  className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105"
+                >
+                  <span className="text-lg">📚</span>
+                  <span>Privacy Blog</span>
+                </Link>
+              </div>
+              
+              {/* Main Content Row */}
+              <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
+                <div className="text-6xl md:text-8xl" role="img" aria-label="Email icon">📧</div>
+                <div className="text-center md:text-left">
+                  <p className="text-lg md:text-xl text-blue-600 font-semibold">
+                    Expert insights on email privacy and security
+                  </p>
+                  {/* Mobile Blog Button */}
+                  <div className="md:hidden mt-4">
+                    <Link 
+                      href="/blog"
+                      className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 shadow-md hover:shadow-lg"
+                    >
+                      <span className="text-lg">📚</span>
+                      <span>Privacy Blog</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold text-gray-900 mb-4 md:mb-6 leading-tight">
               Free Email Generator - OneTimeEmail
             </h1>
