@@ -18,6 +18,11 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: ['/api/', '/admin/', '/inbox/*'],
       },
+      {
+        userAgent: 'Mediapartners-Google',
+        allow: '/',
+        disallow: ['/api/', '/admin/', '/inbox/*'],
+      },
     ],
     sitemap: 'https://onetimeemail.net/sitemap.xml',
     host: 'https://onetimeemail.net',

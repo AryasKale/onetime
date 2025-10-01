@@ -45,7 +45,10 @@ export const metadata: Metadata = {
     images: ['/og-image.jpg'],
   },
   alternates: {
-    canonical: 'https://onetimeemail.net',
+    canonical: 'https://onetimeemail.net/',
+  },
+  other: {
+    'google-site-verification': 'google9fc7f0d25bdf3e4c',
   },
 }
 

@@ -16,6 +16,16 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: 'https://onetimeemail.net',
   },
   openGraph: {
     title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Email Addresses',
@@ -23,6 +33,22 @@ export const metadata: Metadata = {
     url: 'https://onetimeemail.net',
     type: 'website',
     siteName: 'OneTimeEmail',
+    images: [
+      {
+        url: 'https://onetimeemail.net/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'OneTimeEmail - Free Temporary Email Generator',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    site: '@onetimeemail',
+    creator: '@onetimeemail',
+    title: 'Free Email Generator - OneTimeEmail',
+    description: 'Generate temporary and disposable email addresses instantly. Perfect for online registrations, privacy protection, and spam prevention.',
+    images: ['https://onetimeemail.net/og-image.jpg'],
   },
 };
 
@@ -41,6 +67,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Canonical URL */}
+        <link rel="canonical" href="https://onetimeemail.net/" />
+        
+        {/* Google Site Verification */}
+        <meta name="google-site-verification" content="9fc7f0d25bdf3e4c" />
+        
         {/* Minimal, iOS-safe meta tags */}
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
