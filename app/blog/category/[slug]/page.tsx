@@ -139,6 +139,56 @@ const categoryData: Record<string, { name: string; description: string; posts: a
         href: '/articles/temporary-email-vs-vpn-comparison'
       }
     ]
+  },
+  'security-best-practices': {
+    name: 'Security Best Practices',
+    description: 'Professional security practices and implementation guides.',
+    posts: [
+      {
+        id: 'business-security-checklist',
+        title: 'Business Email Security Checklist 2025',
+        excerpt: 'Complete implementation guide for enterprise email security.',
+        readTime: '25 min read',
+        publishDate: 'January 13, 2025',
+        href: '/articles/business-email-security-checklist'
+      },
+      {
+        id: 'qa-testing',
+        title: 'How QA Teams Save 15 Hours Weekly Using Temporary Emails',
+        excerpt: 'Real testing strategies from top tech companies.',
+        readTime: '16 min read',
+        publishDate: 'January 5, 2025',
+        href: '/articles/qa-testing'
+      }
+    ]
+  },
+  'user-experience': {
+    name: 'User Experience',
+    description: 'Optimize your digital experience with privacy-focused strategies.',
+    posts: [
+      {
+        id: 'use-cases',
+        title: '27 Clever Ways People Actually Use Temporary Emails',
+        excerpt: 'Real stories and creative use cases from people who\'ve mastered temporary emails.',
+        readTime: '18 min read',
+        publishDate: 'January 10, 2025',
+        href: '/articles/use-cases'
+      }
+    ]
+  },
+  'sustainability': {
+    name: 'Sustainability',
+    description: 'Environmental impact and green computing with temporary emails.',
+    posts: [
+      {
+        id: 'digital-footprint',
+        title: 'Reducing Digital Footprint with Temporary Emails',
+        excerpt: 'How temporary emails contribute to environmental sustainability.',
+        readTime: '8 min read',
+        publishDate: 'December 25, 2024',
+        href: '/articles/use-cases'
+      }
+    ]
   }
 }
 
