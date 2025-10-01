@@ -123,6 +123,22 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-gray-50 to-blue-50">
       <div className="container mx-auto px-4 py-12">
+        {/* Top Navigation */}
+        <nav className="mb-8">
+          <div className="flex items-center justify-between">
+            <Link 
+              href="/"
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+            >
+              <span>←</span>
+              <span>Back to Email Generator</span>
+            </Link>
+            <div className="text-sm text-gray-500">
+              <span>📧 OneTimeEmail Blog</span>
+            </div>
+          </div>
+        </nav>
+
         {/* Header */}
         <header className="text-center mb-16">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
@@ -132,10 +148,17 @@ export default function BlogPage() {
             Expert insights on email privacy, security, and digital protection. 
             Stay informed with the latest trends and techniques in temporary email services.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <div className="bg-white rounded-full px-6 py-3 shadow-lg border border-gray-200">
               <span className="text-blue-600 font-semibold">📧 Latest Privacy Insights</span>
             </div>
+            <Link 
+              href="/"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+            >
+              <span>⚡</span>
+              <span>Generate Email Now</span>
+            </Link>
           </div>
         </header>
 
