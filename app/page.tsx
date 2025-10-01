@@ -62,15 +62,16 @@ export default function Home() {
         <header className="mb-12 md:mb-20">
           <div className="text-center mb-8 md:mb-10">
             {/* Top Navigation */}
-            <nav className="mb-6">
+            <nav className="mb-8">
               <Link 
                 href="/blog"
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold text-sm transition-colors"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                <span>📚</span>
-                Privacy Blog
-                <span className="text-xs opacity-75">→</span>
+                <span className="text-lg">📚</span>
+                <span>Read Our Privacy Blog</span>
+                <span className="text-sm opacity-75">→</span>
               </Link>
+              <p className="text-sm text-gray-600 mt-3 text-center">Expert insights on email privacy and security</p>
             </nav>
             
             <div className="text-4xl md:text-8xl mb-4 md:mb-6 h-16 md:h-24 flex items-center justify-center" role="img" aria-label="Email icon">📧</div>
@@ -87,6 +88,33 @@ export default function Home() {
             <InboxGeneratorWrapper />
           </div>
         </header>
+
+        {/* Blog Promotion Section */}
+        <section className="mb-8 md:mb-12">
+          <div className="text-center">
+            <div className="bg-white/80 backdrop-blur-xl rounded-2xl p-6 md:p-8 border border-gray-200 shadow-xl max-w-2xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                🧠 Learn Advanced Privacy Techniques
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Discover expert strategies, real case studies, and proven methods to protect your digital identity.
+              </p>
+              <Link 
+                href="/blog"
+                className="inline-flex items-center gap-3 bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:from-indigo-700 hover:to-blue-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                <span className="text-xl">📚</span>
+                <span>Explore Privacy Blog</span>
+                <span className="text-sm opacity-75">→</span>
+              </Link>
+              <div className="flex justify-center gap-6 mt-4 text-sm text-gray-500">
+                <span>✨ Real Stories</span>
+                <span>🎯 Expert Tips</span>
+                <span>🔒 Advanced Strategies</span>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Features Section */}
         <section className="mb-12 md:mb-20">
