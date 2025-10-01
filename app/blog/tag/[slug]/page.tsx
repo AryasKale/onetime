@@ -75,6 +75,116 @@ const tagData: Record<string, { name: string; description: string; posts: any[] 
         href: '/articles/qa-testing'
       }
     ]
+  },
+  'anonymity': {
+    name: 'Anonymity',
+    description: 'Advanced techniques for maintaining online anonymity and privacy.',
+    posts: [
+      {
+        id: 'digital-identity-masterclass',
+        title: 'Digital Identity Protection Masterclass',
+        excerpt: 'Master digital identity protection with comprehensive strategies.',
+        readTime: '30 min read',
+        publishDate: 'January 8, 2025',
+        href: '/articles/digital-identity-protection-masterclass'
+      },
+      {
+        id: 'privacy-pitfalls',
+        title: 'Email Privacy Mistakes That Cost You Dearly',
+        excerpt: 'Real stories of email privacy disasters and practical solutions.',
+        readTime: '14 min read',
+        publishDate: 'January 12, 2025',
+        href: '/articles/privacy-pitfalls'
+      }
+    ]
+  },
+  'spam-protection': {
+    name: 'Spam Protection',
+    description: 'Strategies and techniques for preventing spam and unwanted emails.',
+    posts: [
+      {
+        id: 'privacy-pitfalls',
+        title: 'Email Privacy Mistakes That Cost You Dearly',
+        excerpt: 'Learn how to avoid spam and protect your inbox from unwanted emails.',
+        readTime: '14 min read',
+        publishDate: 'January 12, 2025',
+        href: '/articles/privacy-pitfalls'
+      },
+      {
+        id: 'use-cases',
+        title: '27 Clever Ways People Actually Use Temporary Emails',
+        excerpt: 'Including strategies for spam prevention and inbox protection.',
+        readTime: '18 min read',
+        publishDate: 'January 10, 2025',
+        href: '/articles/use-cases'
+      }
+    ]
+  },
+  'digital-identity': {
+    name: 'Digital Identity',
+    description: 'Protecting and managing your digital identity across online platforms.',
+    posts: [
+      {
+        id: 'digital-identity-masterclass',
+        title: 'Digital Identity Protection Masterclass',
+        excerpt: 'Master digital identity protection with comprehensive strategies.',
+        readTime: '30 min read',
+        publishDate: 'January 8, 2025',
+        href: '/articles/digital-identity-protection-masterclass'
+      },
+      {
+        id: 'privacy-laws-guide',
+        title: 'Email Privacy Laws Guide 2025',
+        excerpt: 'Navigate GDPR, CCPA, and global privacy regulations.',
+        readTime: '22 min read',
+        publishDate: 'January 3, 2025',
+        href: '/articles/email-privacy-laws-2025'
+      }
+    ]
+  },
+  'online-safety': {
+    name: 'Online Safety',
+    description: 'Staying safe online with privacy protection and security measures.',
+    posts: [
+      {
+        id: 'privacy-pitfalls',
+        title: 'Email Privacy Mistakes That Cost You Dearly',
+        excerpt: 'Real stories of email privacy disasters and how to avoid them.',
+        readTime: '14 min read',
+        publishDate: 'January 12, 2025',
+        href: '/articles/privacy-pitfalls'
+      },
+      {
+        id: 'email-security-guide',
+        title: 'Complete Email Security Guide 2025',
+        excerpt: 'Comprehensive strategies for online safety and email protection.',
+        readTime: '20 min read',
+        publishDate: 'January 15, 2025',
+        href: '/articles/email-security-guide'
+      }
+    ]
+  },
+  'email-management': {
+    name: 'Email Management',
+    description: 'Effective strategies for managing your email communications.',
+    posts: [
+      {
+        id: 'qa-testing',
+        title: 'How QA Teams Save 15 Hours Weekly Using Temporary Emails',
+        excerpt: 'Professional email management strategies for testing teams.',
+        readTime: '16 min read',
+        publishDate: 'January 5, 2025',
+        href: '/articles/qa-testing'
+      },
+      {
+        id: 'use-cases',
+        title: '27 Clever Ways People Actually Use Temporary Emails',
+        excerpt: 'Including advanced email management techniques.',
+        readTime: '18 min read',
+        publishDate: 'January 10, 2025',
+        href: '/articles/use-cases'
+      }
+    ]
   }
 }
 
