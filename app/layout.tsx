@@ -25,12 +25,12 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: 'https://onetimeemail.net',
+    canonical: 'https://onetimeemail.net/',
   },
   openGraph: {
     title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Email Addresses',
     description: 'Free email generator for temporary and disposable email addresses. Create fake email addresses instantly for verification, privacy protection, and spam prevention.',
-    url: 'https://onetimeemail.net',
+    url: 'https://onetimeemail.net/',
     type: 'website',
     siteName: 'OneTimeEmail',
     images: [

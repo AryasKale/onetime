@@ -47,9 +47,6 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://onetimeemail.net/',
   },
-  other: {
-    'google-site-verification': 'google9fc7f0d25bdf3e4c',
-  },
 }
 
 export default function Home() {
