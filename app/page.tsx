@@ -26,12 +26,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: 'Free Email Generator - OneTimeEmail | Temporary & Disposable Emails',
     description: 'Generate temporary and disposable email addresses instantly. Perfect for online registrations, privacy protection, and spam prevention. No registration required!',
-    url: 'https://onetimeemail.net',
+    url: 'https://onetimeemail.net/',
     siteName: 'OneTimeEmail',
     type: 'website',
     images: [
       {
-        url: '/og-image.jpg',
+        url: 'https://onetimeemail.net/og-image.jpg',
         width: 1200,
         height: 630,
         alt: 'OneTimeEmail - Free Temporary Email Generator',
@@ -42,10 +42,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Free Email Generator - OneTimeEmail',
     description: 'Generate temporary and disposable email addresses instantly. Perfect for online registrations, privacy protection, and spam prevention.',
-    images: ['/og-image.jpg'],
-  },
-  alternates: {
-    canonical: 'https://onetimeemail.net/',
+    images: ['https://onetimeemail.net/og-image.jpg'],
   },
 }
 
