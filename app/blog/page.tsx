@@ -1,6 +1,7 @@
 import { Metadata, Viewport } from 'next'
 import Link from 'next/link'
 import { generateAdvancedMetadata, generateAdvancedViewport } from '../components/AdvancedSEO'
+import MaterialIcon from '../components/MaterialIcon'
 
 export const metadata: Metadata = generateAdvancedMetadata({
   title: 'OneTimeEmail Blog - Email Privacy, Security & Digital Protection Guides',
@@ -130,11 +131,12 @@ export default function BlogPage() {
               href="/"
               className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-semibold transition-colors"
             >
-              <span>←</span>
+              <MaterialIcon icon="arrow_back" size="small" className="text-blue-600" />
               <span>Back to Email Generator</span>
             </Link>
-            <div className="text-sm text-gray-500">
-              <span>📧 OneTimeEmail Blog</span>
+            <div className="text-sm text-gray-500 flex items-center gap-2">
+              <MaterialIcon icon="email" size="small" className="text-gray-500" />
+              <span>OneTimeEmail Blog</span>
             </div>
           </div>
         </nav>
@@ -156,7 +158,7 @@ export default function BlogPage() {
               href="/"
               className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              <span>⚡</span>
+              <MaterialIcon icon="flash_on" size="small" className="text-white" />
               <span>Generate Email Now</span>
             </Link>
           </div>
@@ -168,8 +170,8 @@ export default function BlogPage() {
             {/* Featured Posts */}
             <section className="mb-12">
               <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                <span className="text-yellow-500">⭐</span>
-                Featured Articles
+                <MaterialIcon icon="star" className="text-yellow-500" />
+                <span>Featured Articles</span>
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {featuredPosts.map((post) => (
@@ -207,8 +209,8 @@ export default function BlogPage() {
             {/* All Posts */}
             <section>
               <h2 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-3">
-                <span className="text-blue-500">📚</span>
-                All Articles
+                <MaterialIcon icon="library_books" className="text-blue-500" />
+                <span>All Articles</span>
               </h2>
               <div className="space-y-6">
                 {regularPosts.map((post) => (
@@ -218,8 +220,14 @@ export default function BlogPage() {
                         {post.category}
                       </span>
                       <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <span>📅 {post.publishDate}</span>
-                        <span>⏱️ {post.readTime}</span>
+                        <span className="flex items-center gap-1">
+                          <MaterialIcon icon="calendar_today" size="small" className="text-gray-400" />
+                          {post.publishDate}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <MaterialIcon icon="schedule" size="small" className="text-gray-400" />
+                          {post.readTime}
+                        </span>
                       </div>
                     </div>
                     <h3 className="text-2xl font-bold text-gray-900 mb-4">
@@ -275,8 +283,8 @@ export default function BlogPage() {
               {/* Categories */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="text-blue-500">📂</span>
-                  Categories
+                  <MaterialIcon icon="folder" className="text-blue-500" />
+                  <span>Categories</span>
                 </h3>
                 <ul className="space-y-2">
                   {categories.map((category) => (
@@ -295,8 +303,8 @@ export default function BlogPage() {
               {/* Recent Posts */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="text-green-500">🔥</span>
-                  Recent Posts
+                  <MaterialIcon icon="trending_up" className="text-green-500" />
+                  <span>Recent Posts</span>
                 </h3>
                 <ul className="space-y-4">
                   {recentPosts.map((post) => (
@@ -315,8 +323,8 @@ export default function BlogPage() {
               {/* Newsletter Signup */}
               <div className="bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl p-6 text-white">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <span>📬</span>
-                  Stay Updated
+                  <MaterialIcon icon="mail" className="text-white" />
+                  <span>Stay Updated</span>
                 </h3>
                 <p className="text-blue-100 mb-4 text-sm">
                   Get the latest privacy tips and security insights delivered to your inbox.
@@ -339,8 +347,8 @@ export default function BlogPage() {
               {/* Archives */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="text-purple-500">📅</span>
-                  Archives
+                  <MaterialIcon icon="archive" className="text-purple-500" />
+                  <span>Archives</span>
                 </h3>
                 <ul className="space-y-2">
                   <li>
@@ -359,8 +367,8 @@ export default function BlogPage() {
               {/* Popular Tags */}
               <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-200">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <span className="text-orange-500">🏷️</span>
-                  Popular Tags
+                  <MaterialIcon icon="label" className="text-orange-500" />
+                  <span>Popular Tags</span>
                 </h3>
                 <div className="flex flex-wrap gap-2">
                   {['privacy', 'security', 'temporary-email', 'anonymity', 'spam-protection', 'digital-identity', 'online-safety', 'email-management'].map((tag) => (

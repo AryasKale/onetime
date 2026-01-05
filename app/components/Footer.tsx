@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import MaterialIcon from './MaterialIcon'
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -62,10 +63,22 @@ export default function Footer() {
             
             {/* Additional Info */}
             <div className="flex flex-wrap justify-center gap-4 text-xs text-gray-400">
-              <span>🔒 HTTPS Secure</span>
-              <span>🚫 No Tracking</span>
-              <span>🆓 Always Free</span>
-              <span>⚡ 10 Min Expiry</span>
+              <span className="flex items-center gap-1">
+                <MaterialIcon icon="https" size="small" className="text-green-500" />
+                HTTPS Secure
+              </span>
+              <span className="flex items-center gap-1">
+                <MaterialIcon icon="block" size="small" className="text-red-500" />
+                No Tracking
+              </span>
+              <span className="flex items-center gap-1">
+                <MaterialIcon icon="free_cancellation" size="small" className="text-blue-500" />
+                Always Free
+              </span>
+              <span className="flex items-center gap-1">
+                <MaterialIcon icon="schedule" size="small" className="text-orange-500" />
+                10 Min Expiry
+              </span>
             </div>
             
             {/* Legal Notice */}

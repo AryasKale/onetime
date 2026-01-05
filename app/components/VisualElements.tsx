@@ -1,4 +1,5 @@
 import React from 'react'
+import MaterialIcon from './MaterialIcon'
 
 // Visual enhancement components for better user engagement
 
@@ -24,7 +25,7 @@ export function FeatureIcon({ icon, size = 'large', color = 'blue' }: { icon: st
   )
 }
 
-export function StatCard({ number, label, icon, color = 'blue' }: { number: string; label: string; icon: string; color?: 'blue' | 'green' | 'purple' | 'orange' | 'red' }) {
+export function StatCard({ number, label, icon, color = 'blue' }: { number: string; label: string; icon: string | React.ReactNode; color?: 'blue' | 'green' | 'purple' | 'orange' | 'red' }) {
   const bgColors = {
     blue: 'bg-blue-50 border-blue-200',
     green: 'bg-green-50 border-green-200',
@@ -44,7 +45,7 @@ export function StatCard({ number, label, icon, color = 'blue' }: { number: stri
   return (
     <div className={`rounded-xl p-6 border ${bgColors[color]} text-center hover:shadow-lg transition-shadow`}>
       <div className={`text-4xl mb-3 ${iconColors[color]}`}>
-        {icon}
+        {typeof icon === 'string' ? icon : icon}
       </div>
       <div className="text-3xl font-bold text-gray-900 mb-2">{number}</div>
       <div className="text-gray-600 font-medium">{label}</div>
@@ -52,7 +53,7 @@ export function StatCard({ number, label, icon, color = 'blue' }: { number: stri
   )
 }
 
-export function ProcessStep({ step, title, description, icon }: { step: number; title: string; description: string; icon: string }) {
+export function ProcessStep({ step, title, description, icon }: { step: number; title: string; description: string; icon: string | React.ReactNode }) {
   return (
     <div className="flex items-start gap-4">
       <div className="flex-shrink-0">
@@ -62,7 +63,7 @@ export function ProcessStep({ step, title, description, icon }: { step: number; 
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">{icon}</span>
+          <span className="text-2xl">{typeof icon === 'string' ? icon : icon}</span>
           <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
         </div>
         <p className="text-gray-700 leading-relaxed">{description}</p>
@@ -74,7 +75,7 @@ export function ProcessStep({ step, title, description, icon }: { step: number; 
 export function BenefitCard({ title, description, icon, benefits, color = 'blue' }: {
   title: string;
   description: string;
-  icon: string;
+  icon: string | React.ReactNode;
   benefits: string[];
   color?: 'blue' | 'green' | 'purple' | 'orange' | 'red'
 }) {
@@ -97,14 +98,14 @@ export function BenefitCard({ title, description, icon, benefits, color = 'blue'
   return (
     <div className={`rounded-xl p-6 border ${bgColors[color]} hover:shadow-lg transition-all hover:scale-105`}>
       <div className={`text-4xl mb-4 ${iconColors[color]}`}>
-        {icon}
+        {typeof icon === 'string' ? icon : icon}
       </div>
       <h3 className="text-xl font-semibold text-gray-900 mb-3">{title}</h3>
       <p className="text-gray-700 mb-4 leading-relaxed">{description}</p>
       <ul className="space-y-2">
         {benefits.map((benefit, index) => (
           <li key={index} className="flex items-start gap-2">
-            <span className={`${iconColors[color]} text-sm mt-1`}>•</span>
+            <MaterialIcon icon="check_circle" size="small" className={iconColors[color]} />
             <span className="text-gray-600 text-sm">{benefit}</span>
           </li>
         ))}

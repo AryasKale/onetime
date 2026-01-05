@@ -264,102 +264,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Interactive Features Showcase */}
-        <section className="mb-16 md:mb-24">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Interactive Privacy Tools
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Put your privacy knowledge into practice with our expert-designed interactive tools and assessments
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Privacy Assessment Tool */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-8 border border-blue-200 hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
-                  <MaterialIcon icon="assessment" size="large" className="text-blue-600" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Privacy Security Assessment</h3>
-                  <p className="text-blue-600 font-semibold">Free • 5-10 minutes</p>
-                </div>
-              </div>
-              
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Get a comprehensive evaluation of your digital privacy posture with our expert-designed assessment. 
-                Receive personalized recommendations and an actionable improvement plan.
-              </p>
-
-              <div className="flex items-center gap-4 mb-6 text-sm text-gray-600">
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="verified" size="small" className="text-green-500" />
-                  Expert-Designed
-                </span>
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="analytics" size="small" className="text-blue-500" />
-                  Detailed Report
-                </span>
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="privacy_tip" size="small" className="text-purple-500" />
-                  100% Anonymous
-                </span>
-              </div>
-
-              <Link 
-                href="/tools/privacy-assessment"
-                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors w-full justify-center"
-              >
-                <MaterialIcon icon="play_arrow" size="small" />
-                <span>Start Assessment</span>
-              </Link>
-            </div>
-
-            {/* Learning Center */}
-            <div className="bg-gradient-to-br from-green-50 to-teal-50 rounded-2xl p-8 border border-green-200 hover:shadow-xl transition-all">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                  <MaterialIcon icon="school" size="large" className="text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Privacy & Security Academy</h3>
-                  <p className="text-green-600 font-semibold">18 Courses • Certificates</p>
-                </div>
-              </div>
-              
-              <p className="text-gray-700 mb-6 leading-relaxed">
-                Master digital privacy through structured learning paths, interactive tutorials, and hands-on exercises. 
-                From beginner basics to advanced professional techniques.
-              </p>
-
-              <div className="flex items-center gap-4 mb-6 text-sm text-gray-600">
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="quiz" size="small" className="text-blue-500" />
-                  Interactive Quizzes
-                </span>
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="workspace_premium" size="small" className="text-purple-500" />
-                  Certificates
-                </span>
-                <span className="flex items-center gap-1">
-                  <MaterialIcon icon="trending_up" size="small" className="text-green-500" />
-                  Progress Tracking
-                </span>
-              </div>
-
-              <Link 
-                href="/learn"
-                className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors w-full justify-center"
-              >
-                <MaterialIcon icon="school" size="small" />
-                <span>Start Learning</span>
-              </Link>
-            </div>
-          </div>
-        </section>
-
         {/* Educational Resources Grid */}
         <section className="mb-16 md:mb-24">
           <div className="text-center mb-12">
@@ -413,22 +317,11 @@ export default function Home() {
               <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-4">
                 <MaterialIcon icon="build" className="text-orange-600" />
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Interactive Tools</h3>
-              <p className="text-gray-600 mb-4">Privacy assessment, learning center, and security tools</p>
-              <div className="space-y-2">
-                <Link href="/tools/privacy-assessment" className="block text-orange-600 hover:text-orange-800 font-semibold text-sm">
-                  Privacy Assessment →
-                </Link>
-                <Link href="/learn" className="block text-orange-600 hover:text-orange-800 font-semibold text-sm">
-                  Learning Center →
-                </Link>
-                <Link href="/community" className="block text-orange-600 hover:text-orange-800 font-semibold text-sm">
-                  Expert Community →
-                </Link>
-                <Link href="#email-tool" className="block text-orange-600 hover:text-orange-800 font-semibold text-sm">
-                  Email Generator →
-                </Link>
-              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-3">Tools & Resources</h3>
+              <p className="text-gray-600 mb-4">Free privacy tools and security checklists</p>
+              <Link href="#email-tool" className="text-orange-600 hover:text-orange-800 font-semibold">
+                Access Tools →
+              </Link>
             </div>
           </div>
         </section>
@@ -554,64 +447,9 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Premium Services CTA */}
-        <section className="mb-16">
-          <div className="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-3xl p-8 md:p-12 text-white text-center">
-            <div className="max-w-3xl mx-auto">
-              <div className="flex justify-center mb-6">
-                <div className="bg-white/20 rounded-full p-4">
-                  <MaterialIcon icon="workspace_premium" size="xl" className="text-white" />
-                </div>
-              </div>
-              
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                Need Professional Privacy Protection?
-              </h2>
-              
-              <p className="text-xl text-purple-100 mb-8">
-                Get personalized privacy audits, security consulting, and expert training from 
-                cybersecurity professionals. Custom solutions for individuals and businesses.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-                <Link 
-                  href="/premium"
-                  className="inline-flex items-center gap-3 bg-white text-purple-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition-colors"
-                >
-                  <MaterialIcon icon="star" />
-                  <span>View Premium Services</span>
-                </Link>
-                
-                <Link 
-                  href="/community"
-                  className="inline-flex items-center gap-3 bg-white/20 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-white/30 transition-colors border-2 border-white/30"
-                >
-                  <MaterialIcon icon="forum" />
-                  <span>Ask Experts Free</span>
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
-                <div className="flex items-center justify-center gap-2">
-                  <MaterialIcon icon="verified_user" size="small" />
-                  <span>Expert Team</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <MaterialIcon icon="security" size="small" />
-                  <span>Professional Grade</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <MaterialIcon icon="support_agent" size="small" />
-                  <span>Personalized Support</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* Newsletter Signup */}
         <section className="mb-16">
-          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-3xl p-8 md:p-12 text-white text-center">
+          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 md:p-12 text-white text-center">
             <div className="max-w-2xl mx-auto">
               <div className="flex justify-center mb-6">
                 <div className="bg-white/20 rounded-full p-4">
